@@ -47,30 +47,6 @@ class GCE_Manager:
         cached_zone = self.cloud_cache.get_zone(zone_name)
         return cached_instance, cached_zone
 
-    def get_candidate_zone(self, instance):
-        # Pick zone(s) with lower instance count to prioritize zone spread balance followed by termination rate
-        candidate_zone_table, unique_instance_count_list = [], []
-        for zone_name, instance_count, termination_rate in self.get_instance_sorted_zone_table(True):
-
-            # Pick zone(s) with unique instance count up to the number of minimum zone spread
-            if len(unique_instance_count_list) < self.config.MIN_ZONE_SPREAD_COUNT:
-                candidate_zone_table.append([zone_name, instance_count, termination_rate])
-                if not instance_count in unique_instance_count_list:
-                    unique_instance_count_list.append(instance_count)
-
-        # Pick the zone with lowest termination rate from candidate_zone_table
-        _zone_name, _instance_count, _termination_rate = None, 0, 0
-        for zone_name, instance_count, termination_rate in candidate_zone_table:
-            # Pick zone record with lower instance termination rate
-            if _zone_name == None or _termination_rate > termination_rate:
-                _zone_name, _instance_count, _termination_rate = zone_name, instance_count, termination_rate
-            # When zone record having same termination rate, pick the one with lower instance count
-            elif _termination_rate == termination_rate:
-                if _instance_count > instance_count:
-                    _zone_name, _instance_count, _termination_rate = zone_name, instance_count, termination_rate
-
-        return _zone_name
-
     def get_config_summary_table(self):
         config_record = []
 
@@ -156,6 +132,30 @@ class GCE_Manager:
             sorted_zone_table.append((zone_name, instance_count, termination_rate))
 
         return sorted_zone_table
+
+    def get_zone_candidate(self, instance):
+        # Pick zone(s) with lower instance count to prioritize zone spread balance followed by termination rate
+        zone_candidate_table, unique_instance_count_list = [], []
+        for zone_name, instance_count, termination_rate in self.get_instance_sorted_zone_table(True):
+
+            # Pick zone(s) with unique instance count up to the number of minimum zone spread
+            if len(unique_instance_count_list) < self.config.MIN_ZONE_SPREAD_COUNT:
+                zone_candidate_table.append([zone_name, instance_count, termination_rate])
+                if not instance_count in unique_instance_count_list:
+                    unique_instance_count_list.append(instance_count)
+
+        # Pick the zone with lowest termination rate from zone_candidate_table
+        _zone_name, _instance_count, _termination_rate = None, 0, 0
+        for zone_name, instance_count, termination_rate in zone_candidate_table:
+            # Pick zone record with lower instance termination rate
+            if _zone_name == None or _termination_rate > termination_rate:
+                _zone_name, _instance_count, _termination_rate = zone_name, instance_count, termination_rate
+            # When zone record having same termination rate, pick the one with lower instance count
+            elif _termination_rate == termination_rate:
+                if _instance_count > instance_count:
+                    _zone_name, _instance_count, _termination_rate = zone_name, instance_count, termination_rate
+
+        return _zone_name
 
     def get_zone_info_list(self):
         zone_info_list, zone_instance_count_table = [], self.get_zone_instance_count_table()
@@ -291,15 +291,15 @@ class GCE_Manager:
                 self.engine.start_instance(terminated_instance.zone, terminated_instance.name)
             else:
                 if not self.low_preemptible_supply():
-                    candidate_zone = self.get_candidate_zone(terminated_instance)
+                    zone_candidate = self.get_zone_candidate(terminated_instance)
 
                     # Forward to Strategy 3 when best zone candidate is same with the instance terminated zone
-                    if candidate_zone == terminated_instance.zone:
+                    if zone_candidate == terminated_instance.zone:
                         # Strategy 3: Convert instance to non-preemptible instance
                         self.recreate_instance(terminated_instance, False)
                     else:
                         # Strategy 2: Relocate instance to different zone
-                        self.recreate_instance(terminated_instance, True, candidate_zone)
+                        self.recreate_instance(terminated_instance, True, zone_candidate)
                 else:
                     # Pick zone with the least instance count which is the first entry
                     zone_name, instance_count, termination_rate = self.get_instance_sorted_zone_table()[0]
@@ -321,10 +321,10 @@ class GCE_Manager:
                 self.log_and_email(MESSAGE_RECYCLE % params)
             else:
                 if not self.low_preemptible_supply():
-                    candidate_zone = self.get_candidate_zone(terminated_instance)
+                    zone_candidate = self.get_zone_candidate(terminated_instance)
 
                     # Forward to Strategy 3 when best zone candidate is same with the instance terminated zone
-                    if candidate_zone == terminated_instance.zone:
+                    if zone_candidate == terminated_instance.zone:
                         # Strategy 3: Convert instance to non-preemptible instance
                         self.log_and_email(MESSAGE_CONVERT_NPE % params)
                     else:

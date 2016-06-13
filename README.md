@@ -2,7 +2,7 @@
 
 This project manages a pool of GCE (preemptible and non-preemptible) instances with desired minimum count of instances running at a time. Whenever any preemptible instances get terminated, it will attempt to restart or recreate them in different zone and if preemptible instances are unavailable, non-preemptible instances will be created instead.
 
-There are 3 strategies used in GCE Manager to main compute capacity:
+There are 3 strategies used in GCE Manager to maintain compute capacity:
   1. Recycling instance - Start back the same instance if it gets terminated for the first time or an instance reaches maturity stage
   2. Relocating instance - Move instances that were terminated twice to different zones based on termination rate score
   3. Using non-preemptibles - When too many zones are high in demand, use guaranteed uptime instance for stability until demand cools down

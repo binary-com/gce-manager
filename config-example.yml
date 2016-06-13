@@ -1,0 +1,42 @@
+# This can be obtained from Google Cloud Platform portal's project information located at the top right of the page
+GCE_PROJECT_ID: my_project_id
+
+# More info at https://developers.google.com/identity/protocols/application-default-credentials
+GCE_GOOGLE_APPLICATION_CREDENTIALS: /path/of_google_cloud_platform/credential.json
+
+# The base disk snapshot to be used by GCE Manager when spawning instances
+GCE_SNAPSHOT_SOURCE: projects/my_project_id/global/snapshots/my_snapshot
+
+# Machine type of GCE to be spawned, refer to https://cloud.google.com/compute/docs/machine-types
+GCE_MACHINE_TYPE: f1-micro
+
+# Disk type to be used for GCE to be spawned, 'pd-ssd' for SSD or 'pd-standard' for normal disk
+GCE_DISK_TYPE: pd-ssd
+
+# Allowed zones for instances to be spawned, refer to https://cloud.google.com/compute/docs/regions-zones/regions-zones
+GCE_ZONE_LIST: 'us-east1-b us-east1-c us-east1-d'
+
+# Minimum number of GCE instance(s) that must be running
+GCE_MIN_INSTANCE_COUNT: 2
+
+# Minimum number of zones that GCE instance(s) must be spread evenly
+GCE_MIN_ZONE_SPREAD_COUNT: 2
+
+# Non-preemptible instance minimum utilization hour after spawned
+GCE_NON_PREEMPTIBLE_INSTANCE_MIN_ALIVE_HOUR: 3
+
+# Threshold of zone(s) in high demand before triggering non-preemptible instance usage (between 0 and 1)
+GCE_PREEMPTIBLE_HIGH_DEMAND_ZONE_THRESHOLD: 0.5
+
+# Instance name prefix list separated by space. GCE Manager only manage instance name with prefix specified here
+GCE_INSTANCE_NAME_PREFIX_LIST: 'temp-cluster temp-webserver temp-processor'
+
+# List of instance names to be excluded from GCE Manager monitoring separated by space
+GCE_EXCLUDED_INSTANCE_LIST: 'instance_name1_you_want_to_exclude instance_name2_you_want_to_exclude'
+
+# List of tags separated by space to be applied to spawned instances
+GCE_INSTANCE_TAG_LIST: 'tag1 tag2'
+
+# Send email to this list of addresses whenever any GCE instance gets terminated and respawned, '' to disable
+# A local SMTP server for relaying email from 127.0.0.1 must be setup for this to work
+GCEM_EMAIL_RECIPIENT_LIST: 'recipient1@email.com recipient2@email.com'

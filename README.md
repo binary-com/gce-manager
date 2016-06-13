@@ -1,6 +1,12 @@
 # Google Compute Engine Manager
 
-This project manages a pool of GCE (preemptible and non-preemptible) instances with desired minimum count of instances running at a time. Whenever any preemptible instances get terminated, it will attempt to recreate them and if preemptible instances are unavailable, non-preemptible instances will be created instead.
+This project manages a pool of GCE (preemptible and non-preemptible) instances with desired minimum count of instances running at a time. Whenever any preemptible instances get terminated, it will attempt to restart or recreate them in different zone and if preemptible instances are unavailable, non-preemptible instances will be created instead.
+
+There are 3 strategies used in GCE Manager to main compute capacity:
+  1. Recycling instance - Start back the same instance if it gets terminated for the first time or an instance reaches maturity stage
+  2. Relocating instance - Move instances that were terminated twice to different zones based on termination rate score
+  3. Using non-preemptibles - When too many zones are high in demand, use guaranteed uptime instance for stability until demand cools down
+
 
 ## Instructions
 1. Install Google API Python client and PyYAML via pip:
@@ -54,12 +60,6 @@ Each newly created instance is marked with **NI-flag (New Instance)** and instan
 As more uptime accumulated with lesser termination events among instances in all zones, the termination rate of zones that exceed acceptable threshold will drop eventually. Once the termination rate reaches an acceptable threshold in less than 50% of the zones, GCE Manager will continue using preemptible instances for all zones again.
 
 `Note: Acceptable threshold is calculated based on the value set for GCE_NON_PREEMPTIBLE_INSTANCE_MIN_ALIVE_HOUR. For example, if 3 is the value set for it, then the termination rate threshold for a zone before using non-preemptible instance is (1/3) = 0.33333. 1 is a constant value for termination count, hence whenever termination happens more than once within 3 hours duration, then a zone is considered to have exceeded acceptable threshold`
-
-In brief, below are the 3 strategies used in GCE Manager:
-  1. Recycling instance - Start back the same instance if it gets terminated for the first time or an instance reaches maturity stage
-  2. Relocating instance - Move instances that were terminated twice to different zones based on termination rate score
-  3. Using non-preemptibles - When too many zones are high in demand, use guaranteed uptime instance for stability until demand cools down
-
 
 ## Future enhancements
 

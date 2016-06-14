@@ -35,19 +35,22 @@ class GAPI:
         locked_acquired = False
         try:
             _instance_list = self.list_instance(zone)
-            self.lock.acquire()
-            locked_acquired = True
-            for instance in _instance_list:
-                if self.abort_all:
-                    break
-                else:
-                    _instance = self._dict_to_instance(instance)
-                    instance_excluded = _instance.name in self.config.EXCLUDED_INSTANCE_LIST
+            if _instance_list == None:
+                return
+            else:
+                self.lock.acquire()
+                locked_acquired = True
+                for instance in _instance_list:
+                    if self.abort_all:
+                        break
+                    else:
+                        _instance = self._dict_to_instance(instance)
+                        instance_excluded = _instance.name in self.config.EXCLUDED_INSTANCE_LIST
 
-                    if not instance_excluded and self._match_name_prefix_list(_instance.name):
-                        self.all_instance.append(_instance)
-            self.zone_count -= 1
-            self.lock.release()
+                        if not instance_excluded and self._match_name_prefix_list(_instance.name):
+                            self.all_instance.append(_instance)
+                self.zone_count -= 1
+                self.lock.release()
         except Exception, exception:
             self.logger.info(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
             if locked_acquired:

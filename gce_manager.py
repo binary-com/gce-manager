@@ -227,7 +227,7 @@ class GCE_Manager:
         while not self.abort_all:
             start_time = datetime.utcnow()
             self.cloud = Cloud(self.engine.get_all_instance(self.config.ZONE_LIST))
-            time.sleep(self.get_cooldown_time(start_time))
+            time.sleep(self.get_cooldown_time(start_time, max_cooldown=5))
 
     def load_cached_cloud(self):
         cloud_cache = self.util.load_object(self.config.PROJECT_ID)

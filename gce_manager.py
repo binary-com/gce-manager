@@ -69,6 +69,7 @@ class GCE_Manager:
         else:
             return (instance_type, instance.name, instance.zone)
 
+    # TODO: Review logic
     def get_instance_sorted_zone_table(self, exclude_low_preemptible_supply_zone=False):
         unsorted_zone_table, sorted_zone_table = [], []
         zone_instance_count_table = self.get_zone_instance_count_table()
@@ -116,6 +117,7 @@ class GCE_Manager:
 
         return REPORT_TEMPLATE % params
 
+    # TODO: Review logic
     def get_termination_rate_sorted_zone_table(self, exclude_low_preemptible_supply_zone=False):
         unsorted_zone_table, sorted_zone_table = [], []
         zone_instance_count_table = self.get_zone_instance_count_table()
@@ -133,6 +135,7 @@ class GCE_Manager:
 
         return sorted_zone_table
 
+    # TODO: Review logic
     def get_zone_candidate(self, instance):
         # Pick zone(s) with lower instance count to prioritize zone spread balance followed by termination rate
         zone_candidate_table, unique_instance_count_list = [], []
@@ -246,6 +249,7 @@ class GCE_Manager:
         recipient = self.config.EMAIL_RECIPIENT_LIST if email == None else email
         self.email_queue.append((self.get_summary_report(), recipient, subject))
 
+    # TODO: Review logic
     def low_preemptible_supply(self, zone_name=None):
         unstable_zone_count = 0
 
@@ -279,6 +283,7 @@ class GCE_Manager:
     def on_instance_started_notification(self, started_instance):
         self.log_and_email(MESSAGE_STARTED % self.get_event_message_param(started_instance))
 
+    # TODO: Don't recreate instance in this method if deleted on purpose
     def on_instance_terminated(self, terminated_instance):
         self.instance_recovering += 1
 

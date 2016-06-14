@@ -325,12 +325,14 @@ class GCE_Manager:
                     # Forward to Strategy 3 when best zone candidate is same with the instance terminated zone
                     if zone_candidate == terminated_instance.zone:
                         # Strategy 3: Convert instance to non-preemptible instance
+                        self.logger.info(MESSAGE_PE_HIGH_DEMAND)
                         self.log_and_email(MESSAGE_CONVERT_NPE % params)
                     else:
                         # Strategy 2: Relocate instance to different zone
                         self.log_and_email(MESSAGE_RELOCATE % params)
                 else:
                     # Strategy 3: Convert instance to non-preemptible instance
+                    self.logger.info(MESSAGE_PE_HIGH_DEMAND)
                     self.log_and_email(MESSAGE_CONVERT_NPE % params)
 
     def recreate_instance(self, instance, preemptible, new_zone=None):

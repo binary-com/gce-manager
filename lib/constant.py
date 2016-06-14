@@ -43,16 +43,17 @@ USAGE_MESSAGE           = 'Usage: gce_manager.py <config_file.yml>'
 TABLE_TITLE_INSTANCE    = ['Name', 'Type', 'Zone', 'Private IP', 'Preemptible', 'Created', 'Uptime Hour(s)', 'Flag', 'Status']
 TABLE_TITLE_ZONE        = ['Zone', 'Instance(s)', 'Total Uptime Hour(s)', 'Termination Count', 'Termination Rate']
 
-MESSAGE_CREATED           = '%s:%s@%s is created'
-MESSAGE_DELETED           = '%s:%s@%s is deleted after %s hour(s)'
-MESSAGE_RUNNING           = '%s:%s@%s is running for %s hour(s)'
-MESSAGE_STARTED           = '%s:%s@%s is online'
-MESSAGE_TERMINATED        = '%s:%s@%s is terminated after %s hour(s)'
+MESSAGE_CREATED         = '%s:%s@%s is created'
+MESSAGE_DELETED         = '%s:%s@%s is deleted after %s hour(s)'
+MESSAGE_RUNNING         = '%s:%s@%s is running for %s hour(s)'
+MESSAGE_STARTED         = '%s:%s@%s is online'
+MESSAGE_TERMINATED      = '%s:%s@%s is terminated after %s hour(s)'
 
-MESSAGE_CONVERT_PE        = 'Converting %s:%s@%s to preemptible instance after %s hour(s)'
-MESSAGE_CONVERT_NPE       = 'Converting %s:%s@%s to non-preemptible instance after %s hour(s)'
-MESSAGE_RECYCLE           = 'Recycling %s:%s@%s after %s hour(s)'
-MESSAGE_RELOCATE          = 'Relocating %s:%s@%s to a different zone after %s hour(s)'
+MESSAGE_CONVERT_PE      = 'Converting %s:%s@%s to preemptible instance after %s hour(s)'
+MESSAGE_CONVERT_NPE     = 'Converting %s:%s@%s to non-preemptible instance after %s hour(s)'
+MESSAGE_RECYCLE         = 'Recycling %s:%s@%s after %s hour(s)'
+MESSAGE_RELOCATE        = 'Relocating %s:%s@%s to a different zone after %s hour(s)'
+MESSAGE_PE_HIGH_DEMAND  = 'Exceeded threshold of total zone(s) with high demand in preemptible instance'
 
 ERR_INSTANCE_LESSER_THAN_ZONE_SPREAD = 'Minimum instance count must be greater or equal to the minimum number of zone(s) to be spread evenly'
 ERR_ZONES_LESSER_THAN_ZONE_SPREAD = 'Minimum zone count must be greater or equal to the minimum number of zone(s) to be spread evenly'

@@ -35,9 +35,7 @@ class GAPI:
         locked_acquired = False
         try:
             _instance_list = self.list_instance(zone)
-            if _instance_list == None:
-                return
-            else:
+            if _instance_list != None:
                 self.lock.acquire()
                 locked_acquired = True
                 for instance in _instance_list:

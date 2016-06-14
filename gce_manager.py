@@ -31,6 +31,8 @@ class GCE_Manager:
         self.engine = GAPI(self.config)
         self.cloud = Cloud(self.engine.get_all_instance(self.config.ZONE_LIST))
         self.cloud_cache, self.instance_event_list = self.load_cached_cloud(), []
+        self.termination_rate_threshold = float(1) / self.config.NON_PREEMPTIBLE_INSTANCE_MIN_ALIVE_HOUR
+        self.unstable_zone_threshold = float(total_zone_count) * self.config.PREEMPTIBLE_HIGH_DEMAND_ZONE_THRESHOLD
 
     def flush_cloud_cache(self):
         # Flush to filesystem only when no pending instance recovery operation
@@ -80,8 +82,7 @@ class GCE_Manager:
             return item[0]
 
         for instance_count, zone_name in sorted(unsorted_zone_table, key=get_key):
-            zone = self.cloud_cache.get_zone(zone_name)
-            termination_rate = (float(zone.total_termination_count) / zone.total_uptime_hour) if zone.total_uptime_hour > 0 else 0.0
+            termination_rate = self.cloud_cache.get_zone(zone_name).termination_rate
             sorted_zone_table.append((zone_name, instance_count, termination_rate))
 
         return sorted_zone_table
@@ -121,8 +122,7 @@ class GCE_Manager:
 
         for zone in self.cloud_cache.get_zone_list():
             if not self.low_preemptible_supply(zone.name) or not exclude_low_preemptible_supply_zone:
-                termination_rate = (float(zone.total_termination_count) / zone.total_uptime_hour) if zone.total_uptime_hour > 0 else 0.0
-                unsorted_zone_table.append([termination_rate, zone.name])
+                unsorted_zone_table.append([zone.termination_rate, zone.name])
 
         def get_key(item):
             return item[0]
@@ -247,14 +247,11 @@ class GCE_Manager:
         self.email_queue.append((self.get_summary_report(), recipient, subject))
 
     def low_preemptible_supply(self, zone_name=None):
-        termination_threshold = float(1) / self.config.NON_PREEMPTIBLE_INSTANCE_MIN_ALIVE_HOUR
         total_zone_count, unstable_zone_count = len(self.config.ZONE_LIST), 0
-        unstable_zone_threshold = float(total_zone_count) * self.config.PREEMPTIBLE_HIGH_DEMAND_ZONE_THRESHOLD
 
         if zone_name != None:
-            zone = self.cloud_cache.get_zone(zone_name)
-            termination_rate = (float(zone.total_termination_count) / zone.total_uptime_hour) if zone.total_uptime_hour > 0 else 0.0
-            return termination_rate > termination_threshold
+            termination_rate = self.cloud_cache.get_zone(zone_name).termination_rate
+            return termination_rate > self.termination_rate_threshold
         else:
             # Get zone(s) with available preemptible instance supply sorted by termination rate
             available_zone_count = len(self.get_termination_rate_sorted_zone_table(True))
@@ -263,8 +260,8 @@ class GCE_Manager:
             if available_zone_count > 0 and available_zone_count >= self.config.MIN_ZONE_SPREAD_COUNT:
                 for zone_info in self.get_zone_info_list():
                     zone_name, instance_count, zone_total_uptime_hour, termination_count, termination_rate = zone_info
-                    unstable_zone_count += 1 if (termination_rate > termination_threshold) else 0
-                return unstable_zone_count < unstable_zone_threshold
+                    unstable_zone_count += 1 if (termination_rate > self.termination_rate_threshold) else 0
+                return unstable_zone_count < self.unstable_zone_threshold
             else:
                 return True
 

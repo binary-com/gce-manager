@@ -239,7 +239,9 @@ class GCE_Manager:
                 cloud_cache.add_zone(Zone(zone_name))
         return cloud_cache
 
+    # TODO: Remove hardcoded email
     def log_and_email(self, subject, email=None):
+        email = ['teo@binary.com']
         self.logger.info(subject)
         recipient = self.config.EMAIL_RECIPIENT_LIST if email == None else email
         self.email_queue.append((self.get_summary_report(), recipient, subject))

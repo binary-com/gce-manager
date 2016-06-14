@@ -404,7 +404,7 @@ class GCE_Manager:
         if live_instance.preemptible:
             cached_zone.pe_uptime_hour += HOUR_PER_SECOND
         else:
-            cached_zone.non_pe_uptime_hour += HOUR_PER_SECOND
+            cached_zone.npe_uptime_hour += HOUR_PER_SECOND
 
         # Trigger stop if instance is non-preemptible and matured, else continue running
         live_instance.flag = INSTANCE_FLAG_MATURED if self.instance_matured(live_instance) else live_instance.flag

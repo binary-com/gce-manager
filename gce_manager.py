@@ -32,7 +32,7 @@ class GCE_Manager:
         self.cloud = Cloud(self.engine.get_all_instance(self.config.ZONE_LIST))
         self.cloud_cache, self.instance_event_list = self.load_cached_cloud(), []
         self.termination_rate_threshold = float(1) / self.config.NON_PREEMPTIBLE_INSTANCE_MIN_ALIVE_HOUR
-        self.unstable_zone_threshold = float(total_zone_count) * self.config.PREEMPTIBLE_HIGH_DEMAND_ZONE_THRESHOLD
+        self.unstable_zone_threshold = float(len(self.config.ZONE_LIST)) * self.config.PREEMPTIBLE_HIGH_DEMAND_ZONE_THRESHOLD
 
     def flush_cloud_cache(self):
         # Flush to filesystem only when no pending instance recovery operation
@@ -247,7 +247,7 @@ class GCE_Manager:
         self.email_queue.append((self.get_summary_report(), recipient, subject))
 
     def low_preemptible_supply(self, zone_name=None):
-        total_zone_count, unstable_zone_count = len(self.config.ZONE_LIST), 0
+        unstable_zone_count = 0
 
         if zone_name != None:
             termination_rate = self.cloud_cache.get_zone(zone_name).termination_rate

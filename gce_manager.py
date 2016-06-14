@@ -398,12 +398,16 @@ class GCE_Manager:
             self.cloud_cache.update_zone(cached_zone)
 
     def update_running_instance_metric(self, cached_zone, live_instance):
-        # Update instance uptime_hour, zone total_uptime_hour and instance maturity status
+        # Update instance uptime_hour and zone uptime_hour
         live_instance.uptime_hour += HOUR_PER_SECOND
-        cached_zone.total_uptime_hour += HOUR_PER_SECOND
-        live_instance.flag = INSTANCE_FLAG_MATURED if self.instance_matured(live_instance) else live_instance.flag
+
+        if live_instance.preemptible:
+            cached_zone.pe_uptime_hour += HOUR_PER_SECOND
+        else:
+            cached_zone.non_pe_uptime_hour += HOUR_PER_SECOND
 
         # Trigger stop if instance is non-preemptible and matured, else continue running
+        live_instance.flag = INSTANCE_FLAG_MATURED if self.instance_matured(live_instance) else live_instance.flag
         non_preemptible_matured = (not live_instance.preemptible and live_instance.flag == INSTANCE_FLAG_MATURED)
         target_event = self.stop_instance if non_preemptible_matured else self.on_instance_running_notification
         params = (live_instance.zone, live_instance.name) if non_preemptible_matured else live_instance

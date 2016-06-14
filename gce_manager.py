@@ -70,7 +70,7 @@ class GCE_Manager:
             return (instance_type, instance.name, instance.zone)
 
     # TODO: Review logic
-    def get_instance_sorted_zone_table(self, exclude_low_preemptible_supply_zone=False):
+    def get_instance_count_sorted_zone_table(self, exclude_low_preemptible_supply_zone=False):
         unsorted_zone_table, sorted_zone_table = [], []
         zone_instance_count_table = self.get_zone_instance_count_table()
 
@@ -139,7 +139,7 @@ class GCE_Manager:
     def get_zone_candidate(self, instance):
         # Pick zone(s) with lower instance count to prioritize zone spread balance followed by termination rate
         zone_candidate_table, unique_instance_count_list = [], []
-        for zone_name, instance_count, termination_rate in self.get_instance_sorted_zone_table(True):
+        for zone_name, instance_count, termination_rate in self.get_instance_count_sorted_zone_table(True):
 
             # Pick zone(s) with unique instance count up to the number of minimum zone spread
             if len(unique_instance_count_list) < self.config.MIN_ZONE_SPREAD_COUNT:
@@ -311,7 +311,7 @@ class GCE_Manager:
                         self.recover_instance(terminated_instance, True, zone_candidate)
                 else:
                     # Pick zone with the least instance count which is the first entry
-                    zone_name, instance_count, termination_rate = self.get_instance_sorted_zone_table()[0]
+                    zone_name, instance_count, termination_rate = self.get_instance_count_sorted_zone_table()[0]
 
                     # Strategy 3: Convert instance to non-preemptible instance
                     self.recover_instance(terminated_instance, False, zone_name)

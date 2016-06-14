@@ -281,6 +281,11 @@ class GCE_Manager:
 
     def on_instance_terminated(self, terminated_instance):
         self.instance_recovering += 1
+
+        # Wait until terminated instance is fully stopped
+        while self.cloud.get_instance(terminated_instance.name).status != GCE_STATUS_TERMINATED:
+            time.sleep(1)
+
         # Convert non-preemptible instance to preemptible instance
         if not terminated_instance.preemptible:
             self.recreate_instance(terminated_instance, True)
@@ -336,10 +341,6 @@ class GCE_Manager:
                     self.log_and_email(MESSAGE_CONVERT_NPE % params)
 
     def recreate_instance(self, instance, preemptible, new_zone=None):
-        # Wait until terminated instance is stopped as it might be in GCE_STATUS_STOPPING state
-        while self.cloud.get_instance(instance.name).status != GCE_STATUS_TERMINATED:
-            time.sleep(1)
-
         # The 'preemptible' option cannot be changed after instance creation, hence recreate instance
         response = self.engine.delete_instance(instance.zone, instance.name)
         self.engine.wait_for_operation(instance.zone, response)

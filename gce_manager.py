@@ -372,6 +372,10 @@ class GCE_Manager:
             while not self.abort_all: time.sleep(1)
         self.shutdown()
 
+    def update_cloud_cache(self, instance, zone):
+        self.cloud_cache.update_instance(instance)
+        self.cloud_cache.update_zone(zone)
+
     def update_cloud_metric(self):
         for cached_instance in self.cloud_cache.get_instance_list():
             # Instance deleted event
@@ -399,8 +403,7 @@ class GCE_Manager:
             elif cached_instance.status == GCE_STATUS_RUNNING and live_instance.status != GCE_STATUS_RUNNING:
                 cached_zone, live_instance = self.update_terminated_instance_metric(cached_instance, cached_zone, live_instance)
 
-            self.cloud_cache.update_instance(live_instance)
-            self.cloud_cache.update_zone(cached_zone)
+            self.update_cloud_cache(live_instance, cached_zone)
 
     def update_running_instance_metric(self, cached_zone, live_instance):
         # Update instance uptime_hour and zone uptime_hour
@@ -433,7 +436,9 @@ class GCE_Manager:
 
         # Update cached instance with current instance status to reflect correctly in instance list
         cached_instance.status = live_instance.status
-        self.cloud_cache.update_instance(cached_instance)
+
+        # Update cloud cache to ensure report reflects current instance status and zone termination rate
+        self.update_cloud_cache(cached_instance, cached_zone)
 
         # Trigger notification synchronously to show flag before update
         self.on_instance_terminated_notification(deepcopy(live_instance))

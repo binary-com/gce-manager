@@ -319,14 +319,11 @@ class GCE_Manager:
             else:
                 if not self.low_preemptible_supply():
                     zone_candidate = self.get_zone_candidate(terminated_instance)
+                    preemptibility = PREEMPTIBLE if (zone_candidate != terminated_instance.zone) else NON_PREEMPTIBLE
 
-                    # Relocate instance only if different zone
-                    if zone_candidate != terminated_instance.zone:
-                        # Strategy 2: Relocate instance to different zone
-                        self.recover_instance(terminated_instance, PREEMPTIBLE, zone_candidate)
-                    else:
-                        # Strategy 3: Convert instance to non-preemptible instance
-                        self.recover_instance(terminated_instance, NON_PREEMPTIBLE, terminated_instance.zone)
+                    # Strategy 2: Relocate instance only if zone candidate is in different zone
+                    # Otherwise recreate it as non-preemptible instance in the same zone
+                    self.recover_instance(terminated_instance, preemptibility, zone_candidate)
                 else:
                     # Pick zone with the least instance count which is the first entry
                     instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, False)

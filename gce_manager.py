@@ -238,9 +238,7 @@ class GCE_Manager:
                 cloud_cache.add_zone(Zone(zone_name))
         return cloud_cache
 
-    # TODO: Remove hardcoded email
     def log_and_email(self, subject, email=None):
-        email = ['teo@binary.com']
         self.logger.info(subject)
         recipient = self.config.EMAIL_RECIPIENT_LIST if email == None else email
         self.email_queue.append((self.get_summary_report(), recipient, subject))
@@ -304,7 +302,7 @@ class GCE_Manager:
 
         self.instance_event_list.append((self.process_terminated_instance, terminated_instance))
 
-    # TODO: Check and don't recreate instance if it is deleted on purpose
+    # TODO: Check and don't recreate instance if it is deleted on purpose - for instance_restructure_engine()
     def process_terminated_instance(self, terminated_instance):
         self.instance_recovering += 1
 

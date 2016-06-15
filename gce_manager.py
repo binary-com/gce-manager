@@ -271,41 +271,6 @@ class GCE_Manager:
     def on_instance_started_notification(self, started_instance):
         self.log_and_email(MESSAGE_STARTED % self.get_event_message_param(started_instance))
 
-    # TODO: Check and don't recreate instance if it is deleted on purpose
-    def on_instance_terminated(self, terminated_instance):
-        self.instance_recovering += 1
-
-        # Wait until terminated instance is fully stopped
-        while self.cloud.get_instance(terminated_instance.name).status != GCE_STATUS_TERMINATED:
-            time.sleep(1)
-
-        # Convert non-preemptible instance to preemptible instance
-        if not terminated_instance.preemptible:
-            self.recover_instance(terminated_instance, True)
-        else:
-            # Strategy 1: Recycling instance
-            if terminated_instance.flag in [INSTANCE_FLAG_NEW, INSTANCE_FLAG_MATURED]:
-                self.recover_instance(terminated_instance, True)
-            else:
-                if not self.low_preemptible_supply():
-                    zone_candidate = self.get_zone_candidate(terminated_instance)
-
-                    # Forward to Strategy 3 when best zone candidate is same with the instance terminated zone
-                    if zone_candidate == terminated_instance.zone:
-                        # Strategy 3: Convert instance to non-preemptible instance
-                        self.recover_instance(terminated_instance, False)
-                    else:
-                        # Strategy 2: Relocate instance to different zone
-                        self.recover_instance(terminated_instance, True, zone_candidate)
-                else:
-                    # Pick zone with the least instance count which is the first entry
-                    instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, False)
-                    zone_name, instance_count, termination_rate, zone_total_uptime_hour = instance_count_sorted_zone_table[0]
-
-                    # Strategy 3: Convert instance to non-preemptible instance
-                    self.recover_instance(terminated_instance, False, zone_name)
-        self.instance_recovering -= 1
-
     def on_instance_terminated_notification(self, terminated_instance):
         params = self.get_event_message_param(terminated_instance, True)
         self.log_and_email(MESSAGE_TERMINATED % params)
@@ -321,30 +286,65 @@ class GCE_Manager:
                 if not self.low_preemptible_supply():
                     zone_candidate = self.get_zone_candidate(terminated_instance)
 
-                    # Forward to Strategy 3 when best zone candidate is same with the instance terminated zone
-                    if zone_candidate == terminated_instance.zone:
+                    # Relocate instance only if different zone
+                    if zone_candidate != terminated_instance.zone:
+                        # Strategy 2: Relocate instance to different zone
+                        self.log_and_email(MESSAGE_RELOCATE % params)
+                    else:
                         # Strategy 3: Convert instance to non-preemptible instance
                         self.logger.info(MESSAGE_PE_HIGH_DEMAND)
                         self.log_and_email(MESSAGE_CONVERT_NPE % params)
-                    else:
-                        # Strategy 2: Relocate instance to different zone
-                        self.log_and_email(MESSAGE_RELOCATE % params)
                 else:
                     # Strategy 3: Convert instance to non-preemptible instance
                     self.logger.info(MESSAGE_PE_HIGH_DEMAND)
                     self.log_and_email(MESSAGE_CONVERT_NPE % params)
 
-    def recover_instance(self, instance, preemptible, new_zone=None):
-        target_zone = new_zone if new_zone != None else instance.zone
+        self.instance_event_list.append((self.process_terminated_instance, live_instance_copy))
 
-        # Start back the same instance if same preemptibility type and zone
-        if instance.preemptible == preemptible and instance.zone == target_zone:
-            self.engine.start_instance(target_zone, instance.name)
+    # TODO: Check and don't recreate instance if it is deleted on purpose
+    def process_terminated_instance(self, terminated_instance):
+        self.instance_recovering += 1
+
+        # Wait until terminated instance is fully stopped
+        while self.cloud.get_instance(terminated_instance.name).status != GCE_STATUS_TERMINATED:
+            time.sleep(1)
+
+        # Convert non-preemptible instance to preemptible instance
+        if not terminated_instance.preemptible:
+            self.recover_instance(terminated_instance, PREEMPTIBLE, terminated_instance.zone)
         else:
-            # The 'preemptible' option cannot be changed after instance creation, hence recreate instance
+            # Strategy 1: Recycling instance
+            if terminated_instance.flag in [INSTANCE_FLAG_NEW, INSTANCE_FLAG_MATURED]:
+                self.recover_instance(terminated_instance, PREEMPTIBLE, terminated_instance.zone)
+            else:
+                if not self.low_preemptible_supply():
+                    zone_candidate = self.get_zone_candidate(terminated_instance)
+
+                    # Relocate instance only if different zone
+                    if zone_candidate != terminated_instance.zone:
+                        # Strategy 2: Relocate instance to different zone
+                        self.recover_instance(terminated_instance, PREEMPTIBLE, zone_candidate)
+                    else:
+                        # Strategy 3: Convert instance to non-preemptible instance
+                        self.recover_instance(terminated_instance, NON_PREEMPTIBLE, terminated_instance.zone)
+                else:
+                    # Pick zone with the least instance count which is the first entry
+                    instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, False)
+                    zone_name, instance_count, termination_rate, zone_total_uptime_hour = instance_count_sorted_zone_table[0]
+
+                    # Strategy 3: Convert instance to non-preemptible instance
+                    self.recover_instance(terminated_instance, NON_PREEMPTIBLE, zone_name)
+        self.instance_recovering -= 1
+
+    def recover_instance(self, instance, preemptible, zone_name):
+        # Start back the same instance if same preemptibility type and zone
+        if instance.preemptible == preemptible and instance.zone == zone_name:
+            self.engine.start_instance(zone_name, instance.name)
+        else:
+            # The zone and preemptible option cannot be changed after instance creation, hence recreate instance
             response = self.engine.delete_instance(instance.zone, instance.name)
             self.engine.wait_for_operation(instance.zone, response)
-            self.engine.create_instance_from_snapshot(target_zone, instance.name, preemptible)
+            self.engine.create_instance_from_snapshot(zone_name, instance.name, preemptible)
 
     def shutdown(self, message=None):
         if not self.abort_all:
@@ -434,10 +434,9 @@ class GCE_Manager:
         cached_instance.status = live_instance.status
         self.cloud_cache.update_instance(cached_instance)
 
-        # Trigger notification synchronously to show flag before update and trigger actual event with threaded execution
+        # Trigger notification synchronously to show flag before update
         live_instance_copy = deepcopy(live_instance)
         self.on_instance_terminated_notification(live_instance_copy)
-        self.instance_event_list.append((self.on_instance_terminated, live_instance_copy))
 
         # Update to proper flag after an instance termination
         pe_instance_flag = INSTANCE_FLAG_RECYCLED if live_instance.flag == INSTANCE_FLAG_NEW else INSTANCE_FLAG_NEW

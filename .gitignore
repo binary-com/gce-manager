@@ -1,0 +1,8 @@
+id_rsa
+id_dsa
+*.pyc
+config.yml
+gcp.json
+sync.sh
+test-script.py
+.luminous-night-130303.pkl

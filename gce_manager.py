@@ -283,7 +283,7 @@ class GCE_Manager:
             self.log_and_email(MESSAGE_CONVERT_PE % params)
         else:
             # Strategy 1: Recycling instance
-            if terminated_instance.flag in [INSTANCE_FLAG_NEW, INSTANCE_FLAG_MATURED]:
+            if terminated_instance.flag != INSTANCE_FLAG_RECYCLED:
                 self.log_and_email(MESSAGE_RECYCLE % params)
             else:
                 if not self.low_preemptible_supply():
@@ -317,15 +317,14 @@ class GCE_Manager:
             self.recover_instance(terminated_instance, PREEMPTIBLE, terminated_instance.zone)
         else:
             # Strategy 1: Recycling instance
-            if terminated_instance.flag in [INSTANCE_FLAG_NEW, INSTANCE_FLAG_MATURED]:
+            if terminated_instance.flag != INSTANCE_FLAG_RECYCLED:
                 self.recover_instance(terminated_instance, PREEMPTIBLE, terminated_instance.zone)
             else:
                 if not self.low_preemptible_supply():
-                    zone_candidate = self.get_zone_candidate(terminated_instance)
-                    preemptibility = PREEMPTIBLE if (zone_candidate != terminated_instance.zone) else NON_PREEMPTIBLE
-
                     # Strategy 2: Relocate instance only if zone candidate is in different zone
                     # Otherwise recreate it as non-preemptible instance in the same zone
+                    zone_candidate = self.get_zone_candidate(terminated_instance)
+                    preemptibility = PREEMPTIBLE if (zone_candidate != terminated_instance.zone) else NON_PREEMPTIBLE
                     self.recover_instance(terminated_instance, preemptibility, zone_candidate)
                 else:
                     # Pick zone with the least instance count which is the first entry
@@ -338,6 +337,14 @@ class GCE_Manager:
         self.instance_recovering -= 1
 
     def recover_instance(self, instance, preemptible, zone_name):
+        if instance.zone != zone_name:
+            source_zone = self.cloud_cache.get_zone(instance.zone)
+            destination_zone = self.cloud_cache.get_zone(zone_name)
+            source_zone.instance_count -= 1
+            destination_zone.instance_count += 1
+            self.cloud_cache.update_zone(source_zone)
+            self.cloud_cache.update_zone(destination_zone)
+
         # Start back the same instance if same preemptibility type and zone
         if instance.preemptible == preemptible and instance.zone == zone_name:
             self.engine.start_instance(zone_name, instance.name)
@@ -346,10 +353,6 @@ class GCE_Manager:
             response = self.engine.delete_instance(instance.zone, instance.name)
             self.engine.wait_for_operation(instance.zone, response)
             self.engine.create_instance_from_snapshot(zone_name, instance.name, preemptible)
-
-        cached_zone = self.cloud_cache.get_zone(zone_name)
-        cached_zone.instance_count += 1
-        self.cloud_cache.update_zone(cached_zone)
 
     def shutdown(self, message=None):
         if not self.abort_all:
@@ -433,8 +436,7 @@ class GCE_Manager:
         return live_instance
 
     def update_terminated_instance_metric(self, cached_instance, cached_zone, live_instance):
-        # Decrement instance count and increment zone total termination count if instance gets terminated before maturity
-        cached_zone.instance_count -= 1
+        # Increment zone total termination count if instance gets terminated before maturity
         cached_zone.total_termination_count += (1 if live_instance.flag != INSTANCE_FLAG_MATURED else 0)
 
         # Update cached instance with current instance status to reflect correctly in instance list

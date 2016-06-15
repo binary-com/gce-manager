@@ -81,6 +81,7 @@ class Cloud:
 
     def update_zone(self, zone):
         current_zone = self.get_zone(zone.name)
+        current_zone.instance_count = zone.instance_count
         current_zone.pe_uptime_hour = zone.pe_uptime_hour
         current_zone.npe_uptime_hour = zone.npe_uptime_hour
         current_zone.total_termination_count = zone.total_termination_count

@@ -102,8 +102,7 @@ class GCE_Manager:
         # Prepare a list of tuples with [instance_count, zone_name]
         for zone in self.cloud_cache.get_zone_list():
             if not self.low_preemptible_supply(zone.name) or include_low_preemptible_supply_zone:
-                instance_count = self.get_zone_instance_count(zone.name)
-                unsorted_zone_table.append([instance_count, zone.name, zone.get_termination_rate(), zone.get_total_uptime_hour()])
+                unsorted_zone_table.append([zone.instance_count, zone.name, zone.get_termination_rate(), zone.get_total_uptime_hour()])
 
         def get_key(item):
             return item[sortkey_index]
@@ -348,6 +347,10 @@ class GCE_Manager:
             self.engine.wait_for_operation(instance.zone, response)
             self.engine.create_instance_from_snapshot(zone_name, instance.name, preemptible)
 
+        cached_zone = self.cloud_cache.get_zone(zone_name)
+        cached_zone.instance_count += 1
+        self.cloud_cache.update_zone(cached_zone)
+
     def shutdown(self, message=None):
         if not self.abort_all:
             if message is not None:
@@ -357,6 +360,7 @@ class GCE_Manager:
 
     def start(self):
         self.update_cloud_metric()
+        self.update_zone_instance_count()
         self.log_and_email(STARTUP_MESSAGE % self.config.PROJECT_ID)
 
         if self.validate_rules():
@@ -409,11 +413,8 @@ class GCE_Manager:
     def update_running_instance_metric(self, cached_zone, live_instance):
         # Update instance uptime_hour and zone uptime_hour
         live_instance.uptime_hour += HOUR_PER_SECOND
-
-        if live_instance.preemptible:
-            cached_zone.pe_uptime_hour += HOUR_PER_SECOND
-        else:
-            cached_zone.npe_uptime_hour += HOUR_PER_SECOND
+        cached_zone.pe_uptime_hour += HOUR_PER_SECOND if live_instance.preemptible else 0
+        cached_zone.npe_uptime_hour += HOUR_PER_SECOND if not live_instance.preemptible else 0
 
         # Trigger stop if instance is non-preemptible and matured, else continue running
         live_instance.flag = INSTANCE_FLAG_MATURED if self.instance_matured(live_instance) else live_instance.flag
@@ -432,8 +433,9 @@ class GCE_Manager:
         return live_instance
 
     def update_terminated_instance_metric(self, cached_instance, cached_zone, live_instance):
-        # Increment zone total termination count if instance gets terminated before maturity
-        cached_zone.total_termination_count += 1 if live_instance.flag != INSTANCE_FLAG_MATURED else 0
+        # Decrement instance count and increment zone total termination count if instance gets terminated before maturity
+        cached_zone.instance_count -= 1
+        cached_zone.total_termination_count += (1 if live_instance.flag != INSTANCE_FLAG_MATURED else 0)
 
         # Update cached instance with current instance status to reflect correctly in instance list
         cached_instance.status = live_instance.status
@@ -449,6 +451,20 @@ class GCE_Manager:
         live_instance.flag = pe_instance_flag if live_instance.preemptible else INSTANCE_FLAG_NEW
 
         return cached_zone, live_instance
+
+    def update_zone_instance_count(self):
+        unique_zone_list = []
+
+        for instance in self.cloud.get_instance_list():
+            cached_zone = self.cloud_cache.get_zone(instance.zone)
+
+            if cached_zone.zone not in unique_zone_list:
+                cached_zone.instance_count = 1
+                unique_zone_list.append(cached_zone.zone)
+            else:
+                cached_zone.instance_count += 1
+
+            self.cloud_cache.update_zone(cached_zone)
 
     def validate_rules(self):
         if self.config.MIN_INSTANCE_COUNT < self.config.MIN_ZONE_SPREAD_COUNT:

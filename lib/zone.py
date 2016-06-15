@@ -4,6 +4,7 @@ from constant import *
 class Zone:
     def __init__(self, name=None):
         self.name = name
+        self.instance_count = 0
         self.pe_uptime_hour = 0
         self.npe_uptime_hour = 0
         self.total_termination_count = 0

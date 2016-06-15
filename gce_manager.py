@@ -239,13 +239,14 @@ class GCE_Manager:
         if zone_name != None:
             termination_rate = self.cloud_cache.get_zone(zone_name).get_termination_rate()
             return termination_rate > self.termination_rate_threshold
+            self.logger.info('%s: %s' % (zone_name, (termination_rate > self.termination_rate_threshold)))
         else:
             # Get zone(s) with available preemptible instance supply sorted by termination rate
             termination_rate_sorted_zone_table = self.get_sorted_zone_table(INDEX_TERMINATION_RATE, False)
             available_zone_count = len(termination_rate_sorted_zone_table)
 
             self.logger.info('available_zone_count: %s' % available_zone_count)
-            self.logger.info('unstable_zone_count:%s self.unstable_zone_threshold: %s' % (unstable_zone_count, self.unstable_zone_threshold))
+
 
             # Return overall zone count availability if the minimum zone spread with preemptible instance supply is met
             if available_zone_count > 0 and available_zone_count >= self.config.MIN_ZONE_SPREAD_COUNT:
@@ -253,6 +254,7 @@ class GCE_Manager:
                     zone_name, instance_count, zone_total_uptime_hour, termination_count, termination_rate = zone_info
                     unstable_zone_count += 1 if (termination_rate > self.termination_rate_threshold) else 0
                     self.logger.info('termination_rate: %s self.termination_rate_threshold: %s' % (termination_rate, self.termination_rate_threshold))
+                self.logger.info('unstable_zone_count:%s self.unstable_zone_threshold: %s' % (unstable_zone_count, self.unstable_zone_threshold))
                 return unstable_zone_count < self.unstable_zone_threshold
             else:
                 return True

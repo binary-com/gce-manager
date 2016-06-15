@@ -421,7 +421,7 @@ class GCE_Manager:
         # Trigger stop if instance is non-preemptible and matured, else continue running
         live_instance.flag = INSTANCE_FLAG_MATURED if self.instance_matured(live_instance) else live_instance.flag
         non_preemptible_matured = (not live_instance.preemptible and live_instance.flag == INSTANCE_FLAG_MATURED)
-        target_event = self.stop_instance if non_preemptible_matured else self.on_instance_running_notification
+        target_event = self.engine.stop_instance if non_preemptible_matured else self.on_instance_running_notification
         params = (live_instance.zone, live_instance.name) if non_preemptible_matured else live_instance
         self.instance_event_list.append((target_event, params))
 

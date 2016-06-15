@@ -133,7 +133,6 @@ class GCE_Manager:
 
         return unstable_zone_count
 
-    # TODO: Review logic
     def get_zone_candidate(self, instance):
         zone_candidate_table, unique_instance_count_list = [], []
         _zone_name, _instance_count, _termination_rate = None, 0, 0
@@ -215,8 +214,9 @@ class GCE_Manager:
         npe_matured = instance.uptime_hour > self.config.NON_PREEMPTIBLE_INSTANCE_MIN_ALIVE_HOUR
         return pe_matured if instance.preemptible else npe_matured
 
-    # TODO: [Future enhancement] Auto-create instance from snapshot if instance deleted and instance count < self.config.MIN_INSTANCE_COUNT
-    # TODO: [Future enhancement] Creation of instance in respective zone should observe self.config.MIN_ZONE_SPREAD_COUNT
+    # TODO: FUTURE ENHANCEMENT
+    # Auto-create instance from snapshot if instance deleted and instance count < self.config.MIN_INSTANCE_COUNT
+    # Creation of instance in respective zone should observe self.config.MIN_ZONE_SPREAD_COUNT
     def instance_restructure_engine(self):
         while not self.abort_all:
             start_time = datetime.utcnow()
@@ -335,7 +335,7 @@ class GCE_Manager:
 
                     # Strategy 3: Convert instance to non-preemptible instance
                     self.recover_instance(terminated_instance, NON_PREEMPTIBLE, zone_name)
-                    
+
         self.instance_recovering -= 1
 
     def recover_instance(self, instance, preemptible, zone_name):

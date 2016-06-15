@@ -252,7 +252,7 @@ class GCE_Manager:
             available_zone_count = len(termination_rate_sorted_zone_table)
             min_zone_spread_count_satisfied = (available_zone_count >= self.config.MIN_ZONE_SPREAD_COUNT)
             stable_zone_available = (available_zone_count > 0) and min_zone_spread_count_satisfied
-            overall_pe_supply_low = self.get_unstable_zone_count() >= self.unstable_zone_threshold
+            overall_pe_supply_low = self.get_unstable_zone_count() > self.unstable_zone_threshold
 
             # Return overall zone count availability status if there's stable zone available
             return overall_pe_supply_low if stable_zone_available else True

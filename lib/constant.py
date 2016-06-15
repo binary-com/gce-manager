@@ -23,6 +23,8 @@ INDEX_ZONE_NAME         = 1
 INDEX_TERMINATION_RATE  = 2
 INDEX_UPTIME_HOUR       = 3
 
+ALL_ZONE                = True
+PE_AVAILABLE_ZONE_ONLY  = False
 PREEMPTIBLE             = True
 NON_PREEMPTIBLE         = False
 
@@ -49,6 +51,7 @@ REPORT_TEMPLATE         = '%s##Zone(s) Configured#%s##Instance List#%s##GCE Mana
 SHUTDOWN_MESSAGE        = 'Received SIGHUP signal for graceful shutdown. Exiting...'
 STARTUP_MESSAGE         = 'Instance monitoring started for project \'%s\''
 USAGE_MESSAGE           = 'Usage: gce_manager.py <config_file.yml>'
+TABLE_TITLE_COST        = []
 TABLE_TITLE_INSTANCE    = ['Name', 'Type', 'Zone', 'Private IP', 'Preemptible', 'Created', 'Uptime Hour(s)', 'Flag', 'Status']
 TABLE_TITLE_ZONE        = ['Zone', 'Instance(s)', 'Total Uptime Hour(s)', 'Termination Count', 'Termination Rate']
 

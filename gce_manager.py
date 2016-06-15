@@ -63,8 +63,12 @@ class GCE_Manager:
         cooldown_time = 0 if elapsed_time > max_cooldown else (max_cooldown - elapsed_time)
         return cooldown_time
 
+    # TODO: Implementation
     def get_cost_summary_table(self):
-        return ''
+        cost_record = [TABLE_TITLE_COST]
+        #cost_record.append([])
+
+        return str(table(cost_record))
 
     def get_event_message_param(self, instance, include_uptime_hour=False):
         instance_type = GCE_PREEMPTIBLE if instance.preemptible else GCE_NON_PREEMPTIBLE
@@ -134,7 +138,7 @@ class GCE_Manager:
     def get_zone_candidate(self, instance):
         zone_candidate_table, unique_instance_count_list = [], []
         _zone_name, _instance_count, _termination_rate = None, 0, 0
-        instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, False)
+        instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, PE_AVAILABLE_ZONE_ONLY)
 
         # Pick zone(s) with lower instance count to prioritize zone spread balance followed by termination rate
         for zone_name, instance_count, termination_rate, zone_total_uptime_hour in instance_count_sorted_zone_table:
@@ -248,7 +252,7 @@ class GCE_Manager:
             return termination_rate > self.termination_rate_threshold
         else:
             # Get zone(s) with available preemptible instance supply sorted by termination rate
-            termination_rate_sorted_zone_table = self.get_sorted_zone_table(INDEX_TERMINATION_RATE, False)
+            termination_rate_sorted_zone_table = self.get_sorted_zone_table(INDEX_TERMINATION_RATE, PE_AVAILABLE_ZONE_ONLY)
             available_zone_count = len(termination_rate_sorted_zone_table)
             min_zone_spread_count_satisfied = (available_zone_count >= self.config.MIN_ZONE_SPREAD_COUNT)
             stable_zone_available = (available_zone_count > 0) and min_zone_spread_count_satisfied
@@ -326,7 +330,7 @@ class GCE_Manager:
                     self.recover_instance(terminated_instance, preemptibility, zone_candidate)
                 else:
                     # Pick zone with the least instance count which is the first entry
-                    instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, False)
+                    instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, PE_AVAILABLE_ZONE_ONLY)
                     zone_name, instance_count, termination_rate, zone_total_uptime_hour = instance_count_sorted_zone_table[0]
 
                     # Strategy 3: Convert instance to non-preemptible instance

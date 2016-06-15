@@ -98,12 +98,11 @@ class GCE_Manager:
 
     def get_sorted_zone_table(self, sortkey_index, include_low_preemptible_supply_zone):
         unsorted_zone_table, sorted_zone_table = [], []
-        zone_instance_count_table = self.get_zone_instance_count_table()
 
         # Prepare a list of tuples with [instance_count, zone_name]
         for zone in self.cloud_cache.get_zone_list():
             if not self.low_preemptible_supply(zone.name) or include_low_preemptible_supply_zone:
-                instance_count = zone_instance_count_table[zone.name] if zone.name in zone_instance_count_table else 0
+                instance_count = self.get_zone_instance_count(zone.name)
                 unsorted_zone_table.append([instance_count, zone.name, zone.get_termination_rate(), zone.get_total_uptime_hour()])
 
         def get_key(item):
@@ -161,26 +160,27 @@ class GCE_Manager:
         return _zone_name
 
     def get_zone_info_list(self):
-        zone_info_list, zone_instance_count_table = [], self.get_zone_instance_count_table()
+        zone_info_list = []
 
-        for zone in self.config.ZONE_LIST:
-            cached_zone = self.cloud_cache.get_zone(zone)
-            tt_count = cached_zone.total_termination_count
-            termination_rate = (float(tt_count) / cached_zone.get_total_uptime_hour()) if cached_zone.get_total_uptime_hour() > 0 else 0.0
-            instance_count = zone_instance_count_table[zone] if zone in zone_instance_count_table else 0
-            zone_info_list.append((zone, instance_count, cached_zone.get_total_uptime_hour(), tt_count, termination_rate))
+        for zone_name in self.config.ZONE_LIST:
+            cached_zone = self.cloud_cache.get_zone(zone_name)
+            zone_info_list.append(
+                (zone_name,
+                self.get_zone_instance_count(zone_name),
+                cached_zone.get_total_uptime_hour(),
+                cached_zone.total_termination_count,
+                cached_zone.get_termination_rate()))
 
         return zone_info_list
 
-    def get_zone_instance_count_table(self):
-        zone_instance_count_dict = {}
+    def get_zone_instance_count(self, zone_name):
+        instance_count = 0
 
         for instance in self.cloud.get_instance_list():
-            if instance.zone not in zone_instance_count_dict:
-                zone_instance_count_dict[instance.zone] = 1
-            else:
-                zone_instance_count_dict[instance.zone] += 1
-        return zone_instance_count_dict
+            if instance.zone == zone_name:
+                instance_count += 1
+
+        return instance_count
 
     def get_zone_summary_table(self):
         zone_configured = [TABLE_TITLE_ZONE]
@@ -335,6 +335,7 @@ class GCE_Manager:
 
                     # Strategy 3: Convert instance to non-preemptible instance
                     self.recover_instance(terminated_instance, NON_PREEMPTIBLE, zone_name)
+                    
         self.instance_recovering -= 1
 
     def recover_instance(self, instance, preemptible, zone_name):

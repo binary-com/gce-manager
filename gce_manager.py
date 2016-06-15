@@ -303,7 +303,7 @@ class GCE_Manager:
                     self.logger.info(MESSAGE_PE_HIGH_DEMAND)
                     self.log_and_email(MESSAGE_CONVERT_NPE % params)
 
-        self.instance_event_list.append((self.process_terminated_instance, live_instance_copy))
+        self.instance_event_list.append((self.process_terminated_instance, terminated_instance))
 
     # TODO: Check and don't recreate instance if it is deleted on purpose
     def process_terminated_instance(self, terminated_instance):

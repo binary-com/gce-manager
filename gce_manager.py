@@ -243,7 +243,6 @@ class GCE_Manager:
         if zone_name != None:
             termination_rate = self.cloud_cache.get_zone(zone_name).get_termination_rate()
             return termination_rate > self.termination_rate_threshold
-            self.logger.info('%s: %s' % (zone_name, (termination_rate > self.termination_rate_threshold)))
         else:
             # Get zone(s) with available preemptible instance supply sorted by termination rate
             termination_rate_sorted_zone_table = self.get_sorted_zone_table(INDEX_TERMINATION_RATE, False)

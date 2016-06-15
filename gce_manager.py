@@ -96,7 +96,7 @@ class GCE_Manager:
         for zone in self.cloud_cache.get_zone_list():
             if not self.low_preemptible_supply(zone.name) or not exclude_low_preemptible_supply_zone:
                 instance_count = zone_instance_count_table[zone.name] if zone.name in zone_instance_count_table else 0
-                unsorted_zone_table.append([instance_count, zone.name, zone.termination_rate, zone.total_uptime_hour])
+                unsorted_zone_table.append([instance_count, zone.name, zone.termination_rate, zone.get_total_uptime_hour()])
 
         def get_key(item):
             return item[sortkey_index]
@@ -149,9 +149,9 @@ class GCE_Manager:
         for zone in self.config.ZONE_LIST:
             cached_zone = self.cloud_cache.get_zone(zone)
             tt_count = cached_zone.total_termination_count
-            termination_rate = (float(tt_count) / cached_zone.total_uptime_hour) if cached_zone.total_uptime_hour > 0 else 0.0
+            termination_rate = (float(tt_count) / cached_zone.get_total_uptime_hour()) if cached_zone.get_total_uptime_hour() > 0 else 0.0
             instance_count = zone_instance_count_table[zone] if zone in zone_instance_count_table else 0
-            zone_info_list.append((zone, instance_count, cached_zone.total_uptime_hour, tt_count, termination_rate))
+            zone_info_list.append((zone, instance_count, cached_zone.get_total_uptime_hour(), tt_count, termination_rate))
 
         return zone_info_list
 

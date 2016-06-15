@@ -81,8 +81,9 @@ class Cloud:
 
     def update_zone(self, zone):
         current_zone = self.get_zone(zone.name)
+        current_zone.pe_uptime_hour = zone.pe_uptime_hour
+        current_zone.npe_uptime_hour = zone.npe_uptime_hour
         current_zone.total_termination_count = zone.total_termination_count
-        current_zone.total_uptime_hour = zone.total_uptime_hour
 
     def __repr__(self):
         return pformat(vars(self), indent=PRETTY_PRINT_INDENT, width=PRETTY_PRINT_WIDTH)

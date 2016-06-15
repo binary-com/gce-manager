@@ -460,7 +460,7 @@ class GCE_Manager:
 
             if cached_zone.zone not in unique_zone_list:
                 cached_zone.instance_count = 1
-                unique_zone_list.append(cached_zone.zone)
+                unique_zone_list.append(cached_zone.name)
             else:
                 cached_zone.instance_count += 1
 

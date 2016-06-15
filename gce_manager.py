@@ -337,6 +337,7 @@ class GCE_Manager:
         self.instance_recovering -= 1
 
     def recover_instance(self, instance, preemptible, zone_name):
+        # Update instance count when source and destination zones are different
         if instance.zone != zone_name:
             source_zone = self.cloud_cache.get_zone(instance.zone)
             destination_zone = self.cloud_cache.get_zone(zone_name)

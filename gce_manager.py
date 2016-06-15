@@ -96,7 +96,7 @@ class GCE_Manager:
         for zone in self.cloud_cache.get_zone_list():
             if not self.low_preemptible_supply(zone.name) or include_low_preemptible_supply_zone:
                 instance_count = zone_instance_count_table[zone.name] if zone.name in zone_instance_count_table else 0
-                unsorted_zone_table.append([instance_count, zone.name, zone.termination_rate, zone.get_total_uptime_hour()])
+                unsorted_zone_table.append([instance_count, zone.name, zone.get_termination_rate(), zone.get_total_uptime_hour()])
 
         def get_key(item):
             return item[sortkey_index]
@@ -237,7 +237,7 @@ class GCE_Manager:
         unstable_zone_count = 0
 
         if zone_name != None:
-            termination_rate = self.cloud_cache.get_zone(zone_name).termination_rate
+            termination_rate = self.cloud_cache.get_zone(zone_name).get_termination_rate()
             return termination_rate > self.termination_rate_threshold
         else:
             # Get zone(s) with available preemptible instance supply sorted by termination rate

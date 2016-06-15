@@ -432,8 +432,7 @@ class GCE_Manager:
         self.cloud_cache.update_instance(cached_instance)
 
         # Trigger notification synchronously to show flag before update
-        live_instance_copy = deepcopy(live_instance)
-        self.on_instance_terminated_notification(live_instance_copy)
+        self.on_instance_terminated_notification(deepcopy(live_instance))
 
         # Update to proper flag after an instance termination
         pe_instance_flag = INSTANCE_FLAG_RECYCLED if live_instance.flag == INSTANCE_FLAG_NEW else INSTANCE_FLAG_NEW

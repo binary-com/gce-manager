@@ -458,7 +458,7 @@ class GCE_Manager:
         for instance in self.cloud.get_instance_list():
             cached_zone = self.cloud_cache.get_zone(instance.zone)
 
-            if cached_zone.zone not in unique_zone_list:
+            if cached_zone.name not in unique_zone_list:
                 cached_zone.instance_count = 1
                 unique_zone_list.append(cached_zone.name)
             else:

@@ -63,6 +63,9 @@ class GCE_Manager:
         cooldown_time = 0 if elapsed_time > max_cooldown else (max_cooldown - elapsed_time)
         return cooldown_time
 
+    def get_cost_summary_table(self):
+        return ''
+
     def get_event_message_param(self, instance, include_uptime_hour=False):
         instance_type = GCE_PREEMPTIBLE if instance.preemptible else GCE_NON_PREEMPTIBLE
         if include_uptime_hour:

@@ -1,7 +1,7 @@
 API_FAILURE_MESSAGE     = '%s() failed: %s'
 API_MAX_RETRY_NESSAGE   = '%s() max. retry exceeded after %s call(s). Reason: %s'
 API_RETRY_MESSAGE       = '%s() failed: %s. Retrying...'
-API_POLLING_INTERVAL    = 5
+API_POLLING_INTERVAL    = 2
 API_TYPE                = 'compute'
 API_VERSION             = 'v1'
 

@@ -88,13 +88,13 @@ class GCE_Manager:
 
         return str(table(instance_record))
 
-    def get_sorted_zone_table(self, sortkey_index, exclude_low_preemptible_supply_zone=False):
+    def get_sorted_zone_table(self, sortkey_index, include_low_preemptible_supply_zone):
         unsorted_zone_table, sorted_zone_table = [], []
         zone_instance_count_table = self.get_zone_instance_count_table()
 
         # Prepare a list of tuples with [instance_count, zone_name]
         for zone in self.cloud_cache.get_zone_list():
-            if not self.low_preemptible_supply(zone.name) or not exclude_low_preemptible_supply_zone:
+            if not self.low_preemptible_supply(zone.name) or include_low_preemptible_supply_zone:
                 instance_count = zone_instance_count_table[zone.name] if zone.name in zone_instance_count_table else 0
                 unsorted_zone_table.append([instance_count, zone.name, zone.termination_rate, zone.get_total_uptime_hour()])
 
@@ -121,7 +121,7 @@ class GCE_Manager:
     def get_zone_candidate(self, instance):
         # Pick zone(s) with lower instance count to prioritize zone spread balance followed by termination rate
         zone_candidate_table, unique_instance_count_list = [], []
-        instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, True)
+        instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, False)
         for zone_name, instance_count, termination_rate, zone_total_uptime_hour in instance_count_sorted_zone_table:
 
             # Pick zone(s) with unique instance count up to the number of minimum zone spread
@@ -241,7 +241,7 @@ class GCE_Manager:
             return termination_rate > self.termination_rate_threshold
         else:
             # Get zone(s) with available preemptible instance supply sorted by termination rate
-            termination_rate_sorted_zone_table = self.get_sorted_zone_table(INDEX_TERMINATION_RATE, True)
+            termination_rate_sorted_zone_table = self.get_sorted_zone_table(INDEX_TERMINATION_RATE, False)
             available_zone_count = len(termination_rate_sorted_zone_table)
 
             self.logger.info('available_zone_count: %s' % available_zone_count)
@@ -299,7 +299,7 @@ class GCE_Manager:
                         self.recover_instance(terminated_instance, True, zone_candidate)
                 else:
                     # Pick zone with the least instance count which is the first entry
-                    instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, True)
+                    instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, False)
                     zone_name, instance_count, termination_rate, zone_total_uptime_hour = instance_count_sorted_zone_table[0]
 
                     # Strategy 3: Convert instance to non-preemptible instance

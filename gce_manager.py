@@ -21,16 +21,17 @@ class GCE_Manager:
     def __init__(self, config_file):
         self.abort_all = False
         self.email_queue = []
+        self.instance_event_list = []
         self.instance_recovering = 0
         self.config = Config(config_file)
+        self.engine = GAPI(self.config)
         self.util = Util(GCEM_LOGGER_NAME)
         self.logger = self.util.logger
         self.logviewer = logviewer()
         self.logviewer.hook_logger(GCEM_LOGGER_NAME)
 
-        self.engine = GAPI(self.config)
-        self.cloud = Cloud(self.engine.get_all_instance(self.config.ZONE_LIST))
-        self.cloud_cache, self.instance_event_list = self.load_cached_cloud(), []
+        all_instance = self.engine.get_all_instance(self.config.ZONE_LIST)
+        self.cloud, self.cloud_cache = Cloud(all_instance), self.load_cached_cloud()
         self.termination_rate_threshold = float(1) / self.config.NON_PREEMPTIBLE_INSTANCE_MIN_ALIVE_HOUR
         self.unstable_zone_threshold = float(len(self.config.ZONE_LIST)) * self.config.PREEMPTIBLE_HIGH_DEMAND_ZONE_THRESHOLD
 
@@ -128,11 +129,12 @@ class GCE_Manager:
 
     # TODO: Review logic
     def get_zone_candidate(self, instance):
-        # Pick zone(s) with lower instance count to prioritize zone spread balance followed by termination rate
         zone_candidate_table, unique_instance_count_list = [], []
+        _zone_name, _instance_count, _termination_rate = None, 0, 0
         instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, False)
-        for zone_name, instance_count, termination_rate, zone_total_uptime_hour in instance_count_sorted_zone_table:
 
+        # Pick zone(s) with lower instance count to prioritize zone spread balance followed by termination rate
+        for zone_name, instance_count, termination_rate, zone_total_uptime_hour in instance_count_sorted_zone_table:
             # Pick zone(s) with unique instance count up to the number of minimum zone spread
             if len(unique_instance_count_list) < self.config.MIN_ZONE_SPREAD_COUNT:
                 zone_candidate_table.append([zone_name, instance_count, termination_rate])
@@ -140,7 +142,6 @@ class GCE_Manager:
                     unique_instance_count_list.append(instance_count)
 
         # Pick the zone with lowest termination rate from zone_candidate_table
-        _zone_name, _instance_count, _termination_rate = None, 0, 0
         for zone_name, instance_count, termination_rate in zone_candidate_table:
             # Pick zone record with lower instance termination rate
             if _zone_name == None or _termination_rate > termination_rate:
@@ -207,15 +208,12 @@ class GCE_Manager:
         npe_matured = instance.uptime_hour > self.config.NON_PREEMPTIBLE_INSTANCE_MIN_ALIVE_HOUR
         return pe_matured if instance.preemptible else npe_matured
 
-    # TODO: Future enhancement
-    # Auto-create instance from snapshot if instance count drop below self.config.MIN_INSTANCE_COUNT
-    # Instance placement shall observed self.config.MIN_ZONE_SPREAD_COUNT
+    # TODO: [Future enhancement] Auto-create instance from snapshot if instance deleted and instance count < self.config.MIN_INSTANCE_COUNT
+    # TODO: [Future enhancement] Creation of instance in respective zone should observe self.config.MIN_ZONE_SPREAD_COUNT
     def instance_restructure_engine(self):
         while not self.abort_all:
             start_time = datetime.utcnow()
-
             # IMPLEMENTATION HERE
-
             time.sleep(self.get_cooldown_time(start_time))
 
     def instance_status_updater(self):
@@ -264,14 +262,14 @@ class GCE_Manager:
         self.logger.info(MESSAGE_DELETED % self.get_event_message_param(deleted_instance, True))
 
     def on_instance_running_notification(self, running_instance):
-        # Only enabled when debugging issues
+        # FOR DEBUGGING USE ONLY
         # self.logger.info(MESSAGE_RUNNING % self.get_event_message_param(running_instance, True))
         return
 
     def on_instance_started_notification(self, started_instance):
         self.log_and_email(MESSAGE_STARTED % self.get_event_message_param(started_instance))
 
-    # TODO: Don't recreate instance in this method if deleted on purpose
+    # TODO: Check and don't recreate instance if it is deleted on purpose
     def on_instance_terminated(self, terminated_instance):
         self.instance_recovering += 1
 

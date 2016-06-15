@@ -117,6 +117,15 @@ class GCE_Manager:
 
         return REPORT_TEMPLATE % params
 
+    def get_unstable_zone_count(self):
+        unstable_zone_count = 0
+
+        for zone_info in self.get_zone_info_list():
+            zone_name, instance_count, zone_total_uptime_hour, termination_count, termination_rate = zone_info
+            unstable_zone_count += 1 if (termination_rate > self.termination_rate_threshold) else 0
+
+        return unstable_zone_count
+
     # TODO: Review logic
     def get_zone_candidate(self, instance):
         # Pick zone(s) with lower instance count to prioritize zone spread balance followed by termination rate
@@ -232,10 +241,7 @@ class GCE_Manager:
         recipient = self.config.EMAIL_RECIPIENT_LIST if email == None else email
         self.email_queue.append((self.get_summary_report(), recipient, subject))
 
-    # TODO: Review logic
     def low_preemptible_supply(self, zone_name=None):
-        unstable_zone_count = 0
-
         if zone_name != None:
             termination_rate = self.cloud_cache.get_zone(zone_name).get_termination_rate()
             return termination_rate > self.termination_rate_threshold
@@ -244,20 +250,12 @@ class GCE_Manager:
             # Get zone(s) with available preemptible instance supply sorted by termination rate
             termination_rate_sorted_zone_table = self.get_sorted_zone_table(INDEX_TERMINATION_RATE, False)
             available_zone_count = len(termination_rate_sorted_zone_table)
+            min_zone_spread_count_satisfied = (available_zone_count >= self.config.MIN_ZONE_SPREAD_COUNT)
+            stable_zone_available = (available_zone_count > 0) and min_zone_spread_count_satisfied
+            overall_pe_supply_low = self.get_unstable_zone_count() >= self.unstable_zone_threshold
 
-            self.logger.info('available_zone_count: %s' % available_zone_count)
-
-
-            # Return overall zone count availability if the minimum zone spread with preemptible instance supply is met
-            if available_zone_count > 0 and available_zone_count >= self.config.MIN_ZONE_SPREAD_COUNT:
-                for zone_info in self.get_zone_info_list():
-                    zone_name, instance_count, zone_total_uptime_hour, termination_count, termination_rate = zone_info
-                    unstable_zone_count += 1 if (termination_rate > self.termination_rate_threshold) else 0
-                    self.logger.info('termination_rate: %s self.termination_rate_threshold: %s' % (termination_rate, self.termination_rate_threshold))
-                self.logger.info('unstable_zone_count:%s self.unstable_zone_threshold: %s' % (unstable_zone_count, self.unstable_zone_threshold))
-                return unstable_zone_count < self.unstable_zone_threshold
-            else:
-                return True
+            # Return overall zone count availability status if there's stable zone available
+            return overall_pe_supply_low if stable_zone_available else True
 
     def on_instance_created_notification(self, created_instance):
         self.logger.info(MESSAGE_CREATED % self.get_event_message_param(created_instance))

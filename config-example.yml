@@ -39,4 +39,13 @@ GCE_INSTANCE_TAG_LIST: 'tag1 tag2'
 
 # Send email to this list of addresses whenever any GCE instance gets terminated and respawned, '' to disable
 # A local SMTP server for relaying email from 127.0.0.1 must be setup for this to work
-GCEM_EMAIL_RECIPIENT_LIST: 'recipient1@email.com recipient2@email.com'
+GCE_EMAIL_RECIPIENT_LIST: 'recipient1@email.com recipient2@email.com'
+
+# API token for Slack integration to allow querying of GCE instances status via Slack, '' to disable
+GCE_SLACKBOT_API_TOKEN: 'xoxp-XXXXXXXX-XXXXXXXX-XXXXX'
+
+# Slack channel where GCE-Manager will publish the GCE event logging
+GCE_SLACKBOT_LOGGING_CHANNEL: '#channel_name'
+
+# Slackbot will only respond to command from these users, separated by space
+GCE_SLACKBOT_USERS: 'user1 user2 user3'

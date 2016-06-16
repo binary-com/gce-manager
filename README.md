@@ -9,8 +9,8 @@ There are 3 strategies used in GCE Manager to maintain compute capacity:
 
 
 ## Instructions
-1. Install Google API Python client and PyYAML via pip:
-```pip install google-api-python-client pyyaml```
+1. Install Google API Python client, PyYAML and SlackClient via pip. You can omit slackclient if you're not planning to use Slack.
+```pip install google-api-python-client pyyaml slackclient```
 
 2. Save necessary credentials and project information as config.yml based on config-example.yml
 

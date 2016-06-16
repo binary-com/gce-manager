@@ -26,10 +26,12 @@ class GCE_Manager:
         self.instance_recovering = 0
         self.config = Config(config_file)
         self.engine = GAPI(self.config)
-        self.util = Util(GCEM_LOGGER_NAME)
+        self.slackbot = Slackbot(self.config)
+        self.util = Util(DEFAULT_LOGGER_NAME)
+
         self.logger = self.util.logger
         self.logviewer = logviewer()
-        self.logviewer.hook_logger(GCEM_LOGGER_NAME)
+        self.logviewer.hook_logger(DEFAULT_LOGGER_NAME)
 
         all_instance = self.engine.get_all_instance(self.config.ZONE_LIST)
         self.cloud, self.cloud_cache = Cloud(all_instance), self.load_cached_cloud()
@@ -198,11 +200,16 @@ class GCE_Manager:
     def instance_event_engine(self):
         while not self.abort_all:
             start_time = datetime.utcnow()
-            self.instance_event_generator()
-            self.update_cloud_metric()
-            self.flush_cloud_cache()
-            threading.Thread(target=self.flush_email_queue).start()
-            time.sleep(self.get_cooldown_time(start_time))
+            try:
+                self.instance_event_generator()
+                self.update_cloud_metric()
+                self.flush_cloud_cache()
+                threading.Thread(target=self.flush_email_queue).start()
+            except Exception, exception:
+                content = API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception)
+                self.email_queue.append((content, self.config.EMAIL_RECIPIENT_LIST, ERROR_THREAD_CRASHED))
+            finally:
+                time.sleep(self.get_cooldown_time(start_time))
 
     def instance_event_generator(self):
         while len(self.instance_event_list) > 0:
@@ -226,8 +233,13 @@ class GCE_Manager:
     def instance_status_updater(self):
         while not self.abort_all:
             start_time = datetime.utcnow()
-            self.cloud = Cloud(self.engine.get_all_instance(self.config.ZONE_LIST))
-            time.sleep(self.get_cooldown_time(start_time, max_cooldown=API_POLLING_INTERVAL))
+            try:
+                self.cloud = Cloud(self.engine.get_all_instance(self.config.ZONE_LIST))
+            except Exception, exception:
+                content = API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception)
+                self.email_queue.append((content, self.config.EMAIL_RECIPIENT_LIST, ERROR_THREAD_CRASHED))
+            finally:
+                time.sleep(self.get_cooldown_time(start_time, max_cooldown=API_POLLING_INTERVAL))
 
     def load_cached_cloud(self):
         cloud_cache = self.util.load_object(self.config.PROJECT_ID)
@@ -360,6 +372,7 @@ class GCE_Manager:
                 self.logger.info(message)
             self.abort_all = True
             self.engine.shutdown()
+            self.slackbot.shutdown()
 
     def start(self):
         self.update_cloud_metric()
@@ -375,6 +388,9 @@ class GCE_Manager:
 
             # Start waiting for jobs to increase/decrease instances if required
             threading.Thread(target=self.instance_restructure_engine).start()
+
+            # Start Slackbot that allow instance status query
+            threading.Thread(target=self.slackbot.start_bot).start()
 
             # Exit whenever shutdown signal triggered
             while not self.abort_all: time.sleep(1)

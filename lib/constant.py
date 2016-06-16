@@ -36,24 +36,14 @@ PRETTY_PRINT_WIDTH      = 80
 HOUR_PER_SECOND         = (float(1) / 3600)
 REPORT_LOG_COUNT        = 10
 UPTIME_DECIMAL          = 5
+
 CURRENT_PROCESS         = '/proc/self'
 DEFAULT_EMAIL_FOOTER    = 'For more details, go to https://github.com/binary-com/gce-manager'
 DEFAULT_EMAIL_SUBJECT   = 'Report of GCE instance changes'
 DEFAULT_EMAIL_TAG       = '[GCE-MANAGER]'
-GCEM_LOGGER_NAME        = 'gce_manager'
+DEFAULT_LOGGER_NAME     = 'gce_manager'
+ERROR_THREAD_CRASHED    = 'Thread is crashed in GCE-MANAGER!'
 HTML_LINE_BREAK_TAG     = '<br />'
-LOG_RECORD_FORMAT       = '[%(asctime)s] %(levelname)s - %(message)s'
-LOG_TIMESTAMP_FORMAT    = '%Y-%m-%d %H:%M:%S'
-PICKLE_FILE_EXTENSION   = '.pkl'
-PICKLE_FILE_PATH_FORMAT = '%s/.%s%s'
-
-REPORT_TEMPLATE         = '%s##Zone(s) Configured#%s##Instance List#%s##GCE Manager Configuration#%s##%s'.replace('#', HTML_LINE_BREAK_TAG)
-SHUTDOWN_MESSAGE        = 'Received SIGHUP signal for graceful shutdown. Exiting...'
-STARTUP_MESSAGE         = 'Instance monitoring started for project \'%s\''
-USAGE_MESSAGE           = 'Usage: gce_manager.py <config_file.yml>'
-TABLE_TITLE_COST        = []
-TABLE_TITLE_INSTANCE    = ['Name', 'Type', 'Zone', 'Private IP', 'Preemptible', 'Created', 'Uptime Hour(s)', 'Flag', 'Status']
-TABLE_TITLE_ZONE        = ['Zone', 'Instance(s)', 'Total Uptime Hour(s)', 'Termination Count', 'Termination Rate']
 
 MESSAGE_CREATED         = '%s:%s@%s is created'
 MESSAGE_DELETED         = '%s:%s@%s is deleted after %s hour(s)'
@@ -66,6 +56,24 @@ MESSAGE_CONVERT_NPE     = 'Converting %s:%s@%s to non-preemptible instance after
 MESSAGE_RECYCLE         = 'Recycling %s:%s@%s after %s hour(s)'
 MESSAGE_RELOCATE        = 'Relocating %s:%s@%s to a different zone after %s hour(s)'
 MESSAGE_PE_HIGH_DEMAND  = 'Exceeded threshold of total zone(s) with high demand in preemptible instance'
+
+LOG_RECORD_FORMAT       = '[%(asctime)s] %(levelname)s - %(message)s'
+LOG_TIMESTAMP_FORMAT    = '%Y-%m-%d %H:%M:%S'
+PICKLE_FILE_EXTENSION   = '.pkl'
+PICKLE_FILE_PATH_FORMAT = '%s/.%s%s'
+
+REPORT_TEMPLATE         = '%s##Zone(s) Configured#%s##Instance List#%s##GCE Manager Configuration#%s##%s'.replace('#', HTML_LINE_BREAK_TAG)
+SHUTDOWN_MESSAGE        = 'Received SIGHUP signal for graceful shutdown. Exiting...'
+STARTUP_MESSAGE         = 'Instance monitoring started for project \'%s\''
+USAGE_MESSAGE           = 'Usage: gce_manager.py <config_file.yml>'
+
+SLACKBOT_CONNECT_ERROR  = 'Connection to Slack failed, invalid token?'
+SLACKBOT_ICON_EMOJI     = ':snowman:'
+SLACKBOT_USERNAME       = 'gcebot'
+
+TABLE_TITLE_COST        = []
+TABLE_TITLE_INSTANCE    = ['Name', 'Type', 'Zone', 'Private IP', 'Preemptible', 'Created', 'Uptime Hour(s)', 'Flag', 'Status']
+TABLE_TITLE_ZONE        = ['Zone', 'Instance(s)', 'Total Uptime Hour(s)', 'Termination Count', 'Termination Rate']
 
 ERR_INSTANCE_LESSER_THAN_ZONE_SPREAD = 'Minimum instance count must be greater or equal to the minimum number of zone(s) to be spread evenly'
 ERR_ZONES_LESSER_THAN_ZONE_SPREAD = 'Minimum zone count must be greater or equal to the minimum number of zone(s) to be spread evenly'

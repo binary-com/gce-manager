@@ -75,7 +75,7 @@ SLACKBOT_MSG_UNAUTH     = 'Good try @%s but I\'m not authorized to serve your re
 SLACKBOT_MSG_UNKNOWN    = 'I\'m sorry @%s. I don\'t understand your request. Type @%s help to see available commands'
 SLACKBOT_USERNAME       = 'gcebot'
 
-TABLE_TITLE_COST        = ['Usage Type', 'Usage Hour', 'Total', 'Savings']
+TABLE_TITLE_COST        = ['Usage Type', 'Usage Hour', 'Cost/Hour', 'Total', 'Savings']
 TABLE_TITLE_INSTANCE    = ['Node', 'Zone', 'Private IP', 'Type', 'Uptime Hour', 'Flag', 'Status']
 TABLE_TITLE_ZONE        = ['Zone', 'Instance', 'Uptime Hour', 'Termination', 'Termination Rate']
 

@@ -93,7 +93,7 @@ SLACKBOT_ICON_EMOJI     = ':snowman:'
 SLACKBOT_MSG_ACK        = '@%s Here\'s the information that you\'ve requested'
 SLACKBOT_MSG_COST_NOTE  = 'Note: Savings are calculated based on pricing of (non-preemptible usage - preemptible usage)'
 SLACKBOT_MSG_HELP       = '```Commands available:\n1. show config\n2. show instance list\n3. show savings\n4. show zone list\n5. help\n\n%s```' % DEFAULT_EMAIL_FOOTER
-SLACKBOT_MSG_UNAUTH     = 'Good try @%s but I\'m not authorized to serve your request :hand:'
+SLACKBOT_MSG_UNAUTH     = 'Nice try @%s but I\'m not authorized to serve your request :hand:'
 SLACKBOT_MSG_UNKNOWN    = 'I\'m sorry @%s. I don\'t understand your request. Type @%s help to see available commands'
 SLACKBOT_USERNAME       = 'gcebot'
 

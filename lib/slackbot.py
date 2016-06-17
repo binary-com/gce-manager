@@ -11,6 +11,7 @@ from util import *
 class Slackbot:
     def __init__(self, config_obj):
         self.abort_all = False
+        self.bot_tag = None
         self.config = config_obj
         self.util = Util('slackbot')
         self.logger = self.util.logger
@@ -35,15 +36,14 @@ class Slackbot:
 
     def get_channel_name(self, channel):
         if channel != None:
-            channel_info = self.sc.api_call("channels.info", channel=channel)
+            channel_info = self.sc.api_call('channels.info', channel=channel)
             channel_name = channel_info.get('channel')['name'] if channel_info.get('channel') != None else None
             return '#%s' % channel_name if channel_name != None else None
         else:
             return None
 
-    def get_current_identity(self):
-        current_identity = self.sc.api_call("auth.test", token=self.config.SLACKBOT_API_TOKEN)
-        print current_identity
+    def get_current_user_info(self):
+        return self.sc.api_call('auth.test', token=self.config.SLACKBOT_API_TOKEN)
 
     def get_message(self, payload):
         user_name = self.get_user_name(payload.get('user'))
@@ -66,20 +66,22 @@ class Slackbot:
         else:
             return None
 
-    # TODO: Implementation
-    def process_message(self, channel_name, text, timestamp, user_name):
-        # self.config.SLACKBOT_USER_LIST
+    def process_command(self, channel_name, text, timestamp, caller_name):
+        self.send_message(channel_name, SLACKBOT_MSG_ACK % caller_name)
+        lowercase_text = text.lower()
 
-        #self.logger.info('channel:%s text:%s ts:%s user:%s' % (channel_name, text, timestamp, user_name))
-        #channel:#preemptibles text:test ts:2016-06-16 09:58:24.000257 user:teo
-
-        user_id = self.get_current_identity().get('user_id')
-        '''
-        self.send_message(channel_name, self.format_slack_table(self.config_table, True))
-        self.send_message(channel_name, self.format_slack_table(self.cost_table))
-        self.send_message(channel_name, self.format_slack_table(self.zone_table))
-        self.send_message(channel_name, self.format_slack_table(self.instance_table))
-        '''
+        if 'help' in lowercase_text:
+            self.send_message(channel_name, SLACKBOT_MSG_HELP)
+        elif 'show config' in lowercase_text:
+            self.send_message(channel_name, self.format_slack_table(self.config_table, True))
+        elif 'show instance list' in lowercase_text:
+            self.send_message(channel_name, self.format_slack_table(self.instance_table))
+        elif 'show savings' in lowercase_text:
+            self.send_message(channel_name, self.format_slack_table(self.cost_table))
+        elif 'show zone list' in lowercase_text:
+            self.send_message(channel_name, self.format_slack_table(self.zone_table))
+        else:
+            self.send_message(channel_name, SLACKBOT_MSG_UNKNOWN % (caller_name, SLACKBOT_USERNAME))
 
     def send_message(self, channel, message, username=SLACKBOT_USERNAME, icon_emoji=SLACKBOT_ICON_EMOJI):
         if message != None and len(message) > 0:
@@ -88,6 +90,7 @@ class Slackbot:
     def start_bot(self):
         if self.sc.rtm_connect():
             try:
+                self.bot_tag = '<@%s>' % self.get_current_user_info().get('user_id')
                 self.channel_message_monitor()
             except Exception, exception:
                 self.logger.info(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
@@ -103,7 +106,15 @@ class Slackbot:
 
                 if message != None:
                     channel_name, text, timestamp, user_name = message
-                    self.process_message(channel_name, text, timestamp, user_name)
+
+                    if self.bot_tag not in text:
+                        continue
+
+                    if user_name in self.config.SLACKBOT_USER_LIST:
+                        self.process_command(channel_name, text, timestamp, user_name)
+                    else:
+                        self.send_message(channel_name, SLACKBOT_MSG_UNAUTH % user_name)
+
             time.sleep(1)
 
     def shutdown(self, message=None):

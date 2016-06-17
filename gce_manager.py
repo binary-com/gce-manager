@@ -383,7 +383,6 @@ class GCE_Manager:
             self.engine.shutdown()
             self.slackbot.shutdown()
 
-    # Enable slackbot
     def start(self):
         self.update_cloud_metric()
         self.update_zone_instance_count()
@@ -403,7 +402,7 @@ class GCE_Manager:
             threading.Thread(target=self.slackbot.start_bot).start()
 
             # Start updating summary tables for Slackbot retrieval
-            #threading.Thread(target=self.update_slackbot_summary_table_cache).start()
+            threading.Thread(target=self.update_slackbot_summary_table_cache).start()
 
             # Exit whenever shutdown signal triggered
             while not self.abort_all: time.sleep(1)

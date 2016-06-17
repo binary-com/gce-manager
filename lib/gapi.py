@@ -108,6 +108,12 @@ class GAPI:
                     'onHostMaintenance': 'TERMINATE' if preemptible else 'MIGRATE',
                     'automaticRestart': 'false' if preemptible else 'true'
                 },
+                "metadata": {
+                    "items": [{
+                        "key": "fqdn",
+                        "value": instance_name
+                    }]
+                },
                 'serviceAccounts': [{
                     'email': 'default',
                     'scopes': [

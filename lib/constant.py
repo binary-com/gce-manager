@@ -67,8 +67,9 @@ SHUTDOWN_MESSAGE        = 'Received SIGHUP signal for graceful shutdown. Exiting
 STARTUP_MESSAGE         = 'Instance monitoring started for project \'%s\''
 USAGE_MESSAGE           = 'Usage: gce_manager.py <config_file.yml>'
 
-SLACKBOT_CONNECT_ERROR  = 'Connection to Slack failed, invalid token?'
+SLACKBOT_ERR_CONNECT    = 'Connection to Slack failed, invalid token?'
 SLACKBOT_ICON_EMOJI     = ':snowman:'
+SLACKBOT_ERR_PERMISSION = 'Good try %s but I\'m not authorized to serve your request :see_no_evil:'
 SLACKBOT_USERNAME       = 'gcebot'
 
 TABLE_TITLE_COST        = ['Usage Type', 'Usage Hour', 'Total', 'Savings']

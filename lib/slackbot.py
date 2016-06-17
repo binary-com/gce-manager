@@ -41,6 +41,10 @@ class Slackbot:
         else:
             return None
 
+    def get_current_identity(self):
+        current_identity = self.sc.api_call("auth.test", token=self.config.SLACKBOT_API_TOKEN)
+        print current_identity
+
     def get_message(self, payload):
         user_name = self.get_user_name(payload.get('user'))
         channel_name = self.get_channel_name(payload.get('channel'))
@@ -64,16 +68,18 @@ class Slackbot:
 
     # TODO: Implementation
     def process_message(self, channel_name, text, timestamp, user_name):
-        # self.get_user_name('U1HCN8VEC')
         # self.config.SLACKBOT_USER_LIST
 
         #self.logger.info('channel:%s text:%s ts:%s user:%s' % (channel_name, text, timestamp, user_name))
         #channel:#preemptibles text:test ts:2016-06-16 09:58:24.000257 user:teo
 
+        user_id = self.get_current_identity().get('user_id')
+        '''
         self.send_message(channel_name, self.format_slack_table(self.config_table, True))
         self.send_message(channel_name, self.format_slack_table(self.cost_table))
         self.send_message(channel_name, self.format_slack_table(self.zone_table))
         self.send_message(channel_name, self.format_slack_table(self.instance_table))
+        '''
 
     def send_message(self, channel, message, username=SLACKBOT_USERNAME, icon_emoji=SLACKBOT_ICON_EMOJI):
         if message != None and len(message) > 0:
@@ -86,7 +92,7 @@ class Slackbot:
             except Exception, exception:
                 self.logger.info(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
         else:
-            self.logger.info(SLACKBOT_CONNECT_ERROR)
+            self.logger.info(SLACKBOT_ERR_CONNECT)
 
     def channel_message_monitor(self):
         while not self.abort_all:

@@ -76,7 +76,7 @@ class Slackbot:
         elif 'show instance list' in lowercase_text:
             message = self.format_slack_table(self.instance_table)
         elif 'show savings' in lowercase_text:
-            message = self.format_slack_table(self.cost_table)
+            message = self.format_slack_table(self.cost_table) + SLACKBOT_MSG_COST_NOTE
         elif 'show zone list' in lowercase_text:
             message = self.format_slack_table(self.zone_table)
         else:

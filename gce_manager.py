@@ -72,8 +72,16 @@ class GCE_Manager:
     # TODO: Implementation
     def get_cost_summary_table(self, html=False):
         cost_record = [TABLE_TITLE_COST]
-        cost_record.append(['Work-in-progress', 'Work-in-progress', 'Work-in-progress', 'Work-in-progress'])
-        cost_record.append(['Work-in-progress', 'Work-in-progress', 'Work-in-progress', 'Work-in-progress'])
+        npe_hour, pe_hour = 0, 0
+
+        for zone_name in self.config.ZONE_LIST:
+            cached_zone = self.cloud_cache.get_zone(zone_name)
+            npe_hour += cached_zone.npe_uptime_hour
+            pe_hour += cached_zone.pe_uptime_hour
+
+        cost_record.append(['PE', str(pe_hour), '(unknown)', '(total)', '0.00 (0%)'])
+        cost_record.append(['Non-PE', str(npe_hour), '(unknown)', '(total)', '0.00 (0%)'])
+        cost_record.append(['All', str(pe_hour + npe_hour), '(unknown)', '(total)', '0.00 (0%)'])
 
         return str(table(cost_record)) if html else cost_record
 

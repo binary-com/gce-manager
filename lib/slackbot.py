@@ -67,7 +67,7 @@ class Slackbot:
             return None
 
     def process_command(self, channel_name, text, timestamp, caller_name):
-        command_known, lowercase_text, message = True, text.lower(), ''
+        command_known, lowercase_text, message = True, text.replace(self.bot_tag, '').lower().strip(), ''
 
         if 'help' in lowercase_text:
             message = SLACKBOT_MSG_HELP

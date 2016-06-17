@@ -30,7 +30,7 @@ class GAPI:
             instance.zone = _dict['zone'].split('/')[-1]
             return instance
         except Exception, exception:
-            self.log(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
+            self._log(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
 
     def _get_all_instance_worker(self, zone):
         locked_acquired = False
@@ -51,7 +51,7 @@ class GAPI:
                 self.zone_count -= 1
                 self.lock.release()
         except Exception, exception:
-            self.log(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
+            self._log(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
             if locked_acquired:
                 self.lock.release()
 
@@ -78,10 +78,10 @@ class GAPI:
             return compute.disks().insert(project=self.config.PROJECT_ID, zone=zone, body=config).execute()
         except Exception, exception:
             if retry_count > 0 and not self.abort_all:
-                self.log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
+                self._log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
                 return self.create_disk_from_snapshot(zone, disk_name, (retry_count - 1))
             else:
-                self.log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
+                self._log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
 
     def create_instance(self, zone, instance_name, disk_name, preemptible, retry_count=MAX_API_RETRY_COUNT):
         try:
@@ -129,10 +129,10 @@ class GAPI:
             return compute.instances().insert(project=self.config.PROJECT_ID, zone=zone, body=config).execute()
         except Exception, exception:
             if retry_count > 0 and not self.abort_all:
-                self.log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
+                self._log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
                 return self.create_instance(zone, instance_name, disk_name, preemptible, (retry_count - 1))
             else:
-                self.log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
+                self._log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
 
     def create_instance_from_snapshot(self, zone, instance_name, preemptible):
         try:
@@ -140,11 +140,11 @@ class GAPI:
                 response = self.create_disk_from_snapshot(zone, instance_name)
                 self.wait_for_operation(zone, response)
             except:
-                self.log(API_FAILURE_MESSAGE % ('create_disk_from_snapshot', 'Skipped'))
+                self._log(API_FAILURE_MESSAGE % ('create_disk_from_snapshot', 'Skipped'))
             finally:
                 return self.create_instance(zone, instance_name, instance_name, preemptible)
         except Exception, exception:
-            self.log(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
+            self._log(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
 
     def delete_instance(self, zone, instance_name, retry_count=MAX_API_RETRY_COUNT):
         try:
@@ -152,10 +152,10 @@ class GAPI:
             return compute.instances().delete(project=self.config.PROJECT_ID, zone=zone, instance=instance_name).execute()
         except Exception, exception:
             if retry_count > 0 and not self.abort_all:
-                self.log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
+                self._log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
                 return self.delete_instance(zone, instance_name, (retry_count - 1))
             else:
-                self.log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
+                self._log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
 
     def get_all_instance(self, zone_list):
         try:
@@ -172,7 +172,7 @@ class GAPI:
                 time.sleep(0.1)
             return self.all_instance
         except Exception, exception:
-            self.log(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
+            self._log(API_FAILURE_MESSAGE % (sys._getframe().f_code.co_name, exception))
 
     def list_instance(self, zone, retry_count=MAX_API_RETRY_COUNT):
         try:
@@ -184,10 +184,10 @@ class GAPI:
                 return []
         except Exception, exception:
             if retry_count > 0 and not self.abort_all:
-                self.log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
+                self._log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
                 return self.list_instance(zone, (retry_count - 1))
             else:
-                self.log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
+                self._log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
 
     def shutdown(self):
         self.abort_all = True
@@ -198,10 +198,10 @@ class GAPI:
             return compute.instances().start(project=self.config.PROJECT_ID, zone=zone, instance=instance_name).execute()
         except Exception, exception:
             if retry_count > 0 and not self.abort_all:
-                self.log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
+                self._log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
                 return self.start_instance(zone, instance_name, (retry_count - 1))
             else:
-                self.log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
+                self._log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
 
     def stop_instance(self, zone, instance_name, retry_count=MAX_API_RETRY_COUNT):
         try:
@@ -209,10 +209,10 @@ class GAPI:
             return compute.instances().stop(project=self.config.PROJECT_ID, zone=zone, instance=instance_name).execute()
         except Exception, exception:
             if retry_count > 0 and not self.abort_all:
-                self.log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
+                self._log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
                 return self.stop_instance(zone, instance_name, (retry_count - 1))
             else:
-                self.log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
+                self._log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
 
     def wait_for_operation(self, zone, op_response, retry_count=MAX_API_RETRY_COUNT):
         try:
@@ -226,7 +226,7 @@ class GAPI:
                     time.sleep(1)
         except Exception, exception:
             if retry_count > 0 and not self.abort_all:
-                self.log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
+                self._log(API_RETRY_MESSAGE % (sys._getframe().f_code.co_name, exception))
                 return self.wait_for_operation(zone, op_response, (retry_count - 1))
             else:
-                self.log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))
+                self._log(API_MAX_RETRY_NESSAGE % (sys._getframe().f_code.co_name, MAX_API_RETRY_COUNT, exception))

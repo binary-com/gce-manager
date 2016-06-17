@@ -96,7 +96,7 @@ SLACKBOT_CMD_SAVINGS    = 'show savings'
 
 SLACKBOT_EMOJI          = ':snowman:'
 SLACKBOT_ERR_CONNECT    = 'Connection to Slack failed, invalid token?'
-SLACKBOT_MSG_ACK        = '@%s Here\'s the information that you\'ve requested'
+SLACKBOT_MSG_ACK        = '@%s Here\'s the information that you\'ve requested\n'
 SLACKBOT_MSG_COST_NOTE  = 'Note: Savings are calculated based on pricing of (non-preemptible usage - preemptible usage)'
 SLACKBOT_MSG_HELP       = '```Commands available:\n1. show config\n2. show instance list\n3. show savings\n4. show zone list\n5. help\n\n%s```' % DEFAULT_EMAIL_FOOTER
 SLACKBOT_MSG_UNAUTH     = 'Nice try @%s but I\'m not authorized to serve your request :hand:'
@@ -107,5 +107,5 @@ TABLE_TITLE_COST        = ['Usage Type', 'Usage Hour', 'Cost/Hour', 'Total', 'Sa
 TABLE_TITLE_INSTANCE    = ['Node', 'Zone', 'Private IP', 'Type', 'Uptime Hour', 'Flag', 'Status']
 TABLE_TITLE_ZONE        = ['Zone', 'Instance', 'Uptime Hour', 'Termination', 'Termination Rate']
 
-ERR_INSTANCE_LESSER_THAN_ZONE_SPREAD = 'Minimum instance count must be greater or equal to the minimum number of zone(s) to be spread evenly'
-ERR_ZONES_LESSER_THAN_ZONE_SPREAD = 'Minimum zone count must be greater or equal to the minimum number of zone(s) to be spread evenly'
+ERR_INSTANCE_LESSER_THAN_ZONE_SPREAD    = 'Minimum instance count must be greater or equal to the minimum number of zone(s) to be spread evenly'
+ERR_ZONES_LESSER_THAN_ZONE_SPREAD       = 'Minimum zone count must be greater or equal to the minimum number of zone(s) to be spread evenly'

@@ -69,7 +69,6 @@ class GCE_Manager:
         cooldown_time = 0 if elapsed_time > max_cooldown else (max_cooldown - elapsed_time)
         return cooldown_time
 
-    # TODO: Implementation
     def get_cost_summary_table(self, html=False):
         cost_record = [TABLE_TITLE_COST]
         npe_hour, pe_hour = 0, 0

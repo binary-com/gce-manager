@@ -69,7 +69,7 @@ class Slackbot:
             return None
 
     def process_command(self, channel_name, text, timestamp, caller_name):
-        command_known, lowercase_text, message = True, text.lower(), ''
+        header, lowercase_text, message = (SLACKBOT_MSG_ACK % caller_name), text.lower(), ''
 
         if SLACKBOT_CMD_HELP in lowercase_text:
             message = SLACKBOT_MSG_HELP
@@ -82,13 +82,10 @@ class Slackbot:
         elif SLACKBOT_CMD_LZ in lowercase_text:
             message = self.format_slack_table(self.zone_table)
         else:
-            command_known = False
+            header = ''
             message = SLACKBOT_MSG_UNKNOWN % (caller_name, SLACKBOT_USERNAME)
 
-        if command_known:
-            message = '%s\n%s' % ((SLACKBOT_MSG_ACK % caller_name), message)
-
-        self.send_message(channel_name, message)
+        self.send_message(channel_name, '%s%s' % (header, message))
 
     def send_message(self, channel, message, username=SLACKBOT_USERNAME, icon_emoji=SLACKBOT_EMOJI):
         self._msg_queue.append((channel, message, username, icon_emoji))

@@ -73,6 +73,7 @@ class GCE_Manager:
     def get_cost_summary_table(self, html=False):
         cost_record = [TABLE_TITLE_COST]
         cost_record.append(['Work-in-progress', 'Work-in-progress', 'Work-in-progress', 'Work-in-progress'])
+        cost_record.append(['Work-in-progress', 'Work-in-progress', 'Work-in-progress', 'Work-in-progress'])
 
         return str(table(cost_record)) if html else cost_record
 

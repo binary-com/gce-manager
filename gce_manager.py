@@ -72,7 +72,7 @@ class GCE_Manager:
     # TODO: Implementation
     def get_cost_summary_table(self, html=False):
         cost_record = [TABLE_TITLE_COST]
-        #cost_record.append([])
+        cost_record.append(['Work-in-progress', 'Work-in-progress', 'Work-in-progress', 'Work-in-progress'])
 
         return str(table(cost_record)) if html else cost_record
 
@@ -380,6 +380,7 @@ class GCE_Manager:
             self.engine.shutdown()
             self.slackbot.shutdown()
 
+    # Enable slackbot
     def start(self):
         self.update_cloud_metric()
         self.update_zone_instance_count()
@@ -399,7 +400,7 @@ class GCE_Manager:
             threading.Thread(target=self.slackbot.start_bot).start()
 
             # Start updating summary tables for Slackbot retrieval
-            threading.Thread(target=self.update_slackbot_summary_table_cache).start()
+            #threading.Thread(target=self.update_slackbot_summary_table_cache).start()
 
             # Exit whenever shutdown signal triggered
             while not self.abort_all: time.sleep(1)

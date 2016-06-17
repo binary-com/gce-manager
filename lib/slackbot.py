@@ -84,7 +84,7 @@ class Slackbot:
             message = SLACKBOT_MSG_UNKNOWN % (caller_name, SLACKBOT_USERNAME)
 
         if command_known:
-            self.send_message(channel_name, SLACKBOT_MSG_ACK % caller_name)
+            message = SLACKBOT_MSG_ACK % caller_name + message
 
         self.send_message(channel_name, message)
 

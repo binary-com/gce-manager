@@ -16,7 +16,7 @@ class Slackbot:
         self.util = Util('slackbot')
         self.logger = self.util.logger
         self.sc = SlackClient(self.config.SLACKBOT_API_TOKEN)
-        self.config_table, self.cost_table, self.instance_table, self.zone_table = [], [], [], []
+        self._msg_queue, self.config_table, self.cost_table, self.instance_table, self.zone_table = [], [], [], [], []
 
     def format_slack_table(self, table, make_single_column=False):
         single_column_table = ''
@@ -67,7 +67,7 @@ class Slackbot:
             return None
 
     def process_command(self, channel_name, text, timestamp, caller_name):
-        command_known, lowercase_text, message = True, text.replace(self.bot_tag, '').lower().strip(), ''
+        command_known, lowercase_text, message = True, text.lower(), ''
 
         if 'help' in lowercase_text:
             message = SLACKBOT_MSG_HELP
@@ -89,8 +89,7 @@ class Slackbot:
         self.send_message(channel_name, message)
 
     def send_message(self, channel, message, username=SLACKBOT_USERNAME, icon_emoji=SLACKBOT_ICON_EMOJI):
-        if message != None and len(message) > 0:
-            self.sc.api_call("chat.postMessage", channel=channel, text=message, username=username, icon_emoji=icon_emoji)
+        self._msg_queue.append(channel, message, username, icon_emoji)
 
     def start_bot(self):
         if self.sc.rtm_connect():
@@ -120,7 +119,12 @@ class Slackbot:
                     else:
                         self.send_message(channel_name, SLACKBOT_MSG_UNAUTH % user_name)
 
+            # Sleep 1 second for each API call for avoid hitting Slack API rate limit
             time.sleep(1)
+
+            if len(self._msg_queue) > 0:
+                channel, message, username, icon_emoji = self._msg_queue.pop(0)
+                self.sc.api_call("chat.postMessage", channel=channel, text=message, username=username, icon_emoji=icon_emoji)
 
     def shutdown(self, message=None):
         if not self.abort_all:

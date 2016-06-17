@@ -1,3 +1,24 @@
+# Use machine_type as key, (npe_pricing, pe_pricing) as value
+GCE_PRICING_TABLE = {}
+GCE_PRICING_TABLE['f1-micro']       = (0.006, 0.005)
+GCE_PRICING_TABLE['g1-small']       = (0.021, 0.010)
+GCE_PRICING_TABLE['n1-standard-1']  = (0.038, 0.015)
+GCE_PRICING_TABLE['n1-standard-2']  = (0.076, 0.030)
+GCE_PRICING_TABLE['n1-standard-4']  = (0.152, 0.060)
+GCE_PRICING_TABLE['n1-standard-8']  = (0.304, 0.120)
+GCE_PRICING_TABLE['n1-standard-16'] = (0.608, 0.240)
+GCE_PRICING_TABLE['n1-standard-32'] = (1.216, 0.480)
+GCE_PRICING_TABLE['n1-highmem-2']   = (0.096, 0.035)
+GCE_PRICING_TABLE['n1-highmem-4']   = (0.192, 0.070)
+GCE_PRICING_TABLE['n1-highmem-8']   = (0.384, 0.140)
+GCE_PRICING_TABLE['n1-highmem-16']  = (0.768, 0.280)
+GCE_PRICING_TABLE['n1-highmem-32']  = (1.536, 0.560)
+GCE_PRICING_TABLE['n1-highcpu-2']   = (0.058, 0.020)
+GCE_PRICING_TABLE['n1-highcpu-4']   = (0.116, 0.040)
+GCE_PRICING_TABLE['n1-highcpu-8']   = (0.232, 0.080)
+GCE_PRICING_TABLE['n1-highcpu-16']  = (0.464, 0.160)
+GCE_PRICING_TABLE['n1-highcpu-32']  = (0.928, 0.320)
+
 API_FAILURE_MESSAGE     = '%s() failed: %s'
 API_MAX_RETRY_NESSAGE   = '%s() max. retry exceeded after %s call(s). Reason: %s'
 API_RETRY_MESSAGE       = '%s() failed: %s. Retrying...'

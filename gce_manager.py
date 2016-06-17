@@ -79,9 +79,13 @@ class GCE_Manager:
             npe_hour += cached_zone.npe_uptime_hour
             pe_hour += cached_zone.pe_uptime_hour
 
-        cost_record.append(['PE', str(pe_hour), '(unknown)', '(total)', '0.00 (0%)'])
-        cost_record.append(['Non-PE', str(npe_hour), '(unknown)', '(total)', '0.00 (0%)'])
-        cost_record.append(['All', str(pe_hour + npe_hour), '(unknown)', '(total)', '0.00 (0%)'])
+        npe_pricing, pe_pricing = GCE_PRICING_TABLE[self.config.MACHINE_TYPE]
+        npe_total, pe_total = npe_pricing * npe_hour, pe_pricing * pe_hour
+        savings = (npe_pricing * pe_hour) - (pe_pricing * pe_hour)
+
+        cost_record.append([GCE_PREEMPTIBLE, str(pe_hour), '$%s' % pe_pricing, '$%s' % pe_total, '$%s' % savings])
+        cost_record.append([GCE_NON_PREEMPTIBLE, str(npe_hour), '$%s' % npe_pricing, '$%s' % npe_total, '$%s' % 0])
+        cost_record.append(['All', str(pe_hour + npe_hour), '', '$%s' % (pe_total + npe_total), '$%s' % savings])
 
         return str(table(cost_record)) if html else cost_record
 

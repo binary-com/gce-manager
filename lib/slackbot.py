@@ -89,7 +89,7 @@ class Slackbot:
         self.send_message(channel_name, message)
 
     def send_message(self, channel, message, username=SLACKBOT_USERNAME, icon_emoji=SLACKBOT_ICON_EMOJI):
-        self._msg_queue.append(channel, message, username, icon_emoji)
+        self._msg_queue.append((channel, message, username, icon_emoji))
 
     def start_bot(self):
         if self.sc.rtm_connect():

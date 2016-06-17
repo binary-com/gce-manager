@@ -86,6 +86,7 @@ class GCE_Manager:
     def get_html_summary_report(self):
         log_buffer = self.logviewer.get_log_buffer(REPORT_LOG_COUNT)
         params = (  HTML_LINE_BREAK_TAG.join(log_buffer),
+                    self.get_cost_summary_table(True),
                     self.get_zone_summary_table(True),
                     self.get_instance_summary_table(True),
                     self.get_config_summary_table(True),
@@ -256,7 +257,9 @@ class GCE_Manager:
 
     def log(self, subject, send_email=False, email=None):
         self.util.logger.info(subject)
-        self.slackbot.send_message(self.config.SLACKBOT_LOGGING_CHANNEL, subject)
+
+        if len(self.config.SLACKBOT_API_TOKEN.strip()) > 0:
+            self.slackbot.send_message(self.config.SLACKBOT_LOGGING_CHANNEL, subject)
 
         if send_email:
             recipient = self.config.EMAIL_RECIPIENT_LIST if email == None else email

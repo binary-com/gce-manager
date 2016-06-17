@@ -62,7 +62,7 @@ LOG_TIMESTAMP_FORMAT    = '%Y-%m-%d %H:%M:%S'
 PICKLE_FILE_EXTENSION   = '.pkl'
 PICKLE_FILE_PATH_FORMAT = '%s/.%s%s'
 
-REPORT_TEMPLATE         = '%s##Zone(s) Configured#%s##Instance List#%s##GCE Manager Configuration#%s##%s'.replace('#', HTML_LINE_BREAK_TAG)
+REPORT_TEMPLATE         = '%s##Estimated Cost/Savings#%s##Zone(s) Configured#%s##Instance List#%s##GCE Manager Configuration#%s##%s'.replace('#', HTML_LINE_BREAK_TAG)
 SHUTDOWN_MESSAGE        = 'Received SIGHUP signal for graceful shutdown. Exiting...'
 STARTUP_MESSAGE         = 'Instance monitoring started for project \'%s\''
 USAGE_MESSAGE           = 'Usage: gce_manager.py <config_file.yml>'

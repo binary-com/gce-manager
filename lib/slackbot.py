@@ -18,7 +18,7 @@ class Slackbot:
         self.sc = SlackClient(self.config.SLACKBOT_API_TOKEN)
         self._msg_queue, self.config_table, self.cost_table, self.instance_table, self.zone_table = [], [], [], [], []
 
-    def format_slack_table(self, table, make_single_column=False):
+    def format_slack_table(self, table, note=None, make_single_column=False):
         single_column_table = ''
 
         for row in table:
@@ -31,7 +31,9 @@ class Slackbot:
                     _row += '>%s' % record + '\n'
             single_column_table += _row + '\n'
 
-        multi_column_table = '''```%s```''' % self.util.get_ascii_table(table)
+        note_str = note if note != None else ''
+        multi_column_table = '''```%s\n%s```''' % (self.util.get_ascii_table(table), note_str)
+        single_column_table = single_column_table if note == None else '%s\n%s' % (single_column_table, note)
         return single_column_table if make_single_column else multi_column_table
 
     def get_channel_name(self, channel):
@@ -72,11 +74,11 @@ class Slackbot:
         if 'help' in lowercase_text:
             message = SLACKBOT_MSG_HELP
         elif 'show config' in lowercase_text:
-            message = self.format_slack_table(self.config_table, True)
+            message = self.format_slack_table(self.config_table, None, True)
         elif 'show instance list' in lowercase_text:
             message = self.format_slack_table(self.instance_table)
         elif 'show savings' in lowercase_text:
-            message = self.format_slack_table(self.cost_table) + SLACKBOT_MSG_COST_NOTE
+            message = self.format_slack_table(self.cost_table, note=SLACKBOT_MSG_COST_NOTE)
         elif 'show zone list' in lowercase_text:
             message = self.format_slack_table(self.zone_table)
         else:

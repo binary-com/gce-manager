@@ -38,7 +38,7 @@ class Slackbot:
         if channel != None:
             channel_info = self.sc.api_call('channels.info', channel=channel)
             channel_name = channel_info.get('channel')['name'] if channel_info.get('channel') != None else None
-            return '#%s' % channel_name if channel_name != None else None
+            return '#%s' % channel_name if channel_name != None else channel
         else:
             return None
 
@@ -62,7 +62,7 @@ class Slackbot:
     def get_user_name(self, user_id):
         if user_id != None:
             user_info = self.sc.api_call("users.info", user=user_id)
-            return user_info.get('user')['name'] if user_info.get('user') != None else None
+            return user_info.get('user')['name'] if user_info.get('user') != None else user_id
         else:
             return None
 

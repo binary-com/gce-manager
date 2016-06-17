@@ -67,21 +67,26 @@ class Slackbot:
             return None
 
     def process_command(self, channel_name, text, timestamp, caller_name):
-        self.send_message(channel_name, SLACKBOT_MSG_ACK % caller_name)
-        lowercase_text = text.lower()
+        command_known, lowercase_text, message = True, text.lower(), ''
 
         if 'help' in lowercase_text:
-            self.send_message(channel_name, SLACKBOT_MSG_HELP)
+            message = SLACKBOT_MSG_HELP
         elif 'show config' in lowercase_text:
-            self.send_message(channel_name, self.format_slack_table(self.config_table, True))
+            message = self.format_slack_table(self.config_table, True)
         elif 'show instance list' in lowercase_text:
-            self.send_message(channel_name, self.format_slack_table(self.instance_table))
+            message = self.format_slack_table(self.instance_table)
         elif 'show savings' in lowercase_text:
-            self.send_message(channel_name, self.format_slack_table(self.cost_table))
+            message = self.format_slack_table(self.cost_table)
         elif 'show zone list' in lowercase_text:
-            self.send_message(channel_name, self.format_slack_table(self.zone_table))
+            message = self.format_slack_table(self.zone_table)
         else:
-            self.send_message(channel_name, SLACKBOT_MSG_UNKNOWN % (caller_name, SLACKBOT_USERNAME))
+            command_known = False
+            message = SLACKBOT_MSG_UNKNOWN % (caller_name, SLACKBOT_USERNAME)
+
+        if command_known:
+            self.send_message(channel_name, SLACKBOT_MSG_ACK % caller_name)
+
+        self.send_message(channel_name, message)
 
     def send_message(self, channel, message, username=SLACKBOT_USERNAME, icon_emoji=SLACKBOT_ICON_EMOJI):
         if message != None and len(message) > 0:

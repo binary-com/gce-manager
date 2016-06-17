@@ -29,8 +29,8 @@ class GCE_Manager:
         self.logviewer.hook_logger(DEFAULT_LOGGER_NAME)
 
         self.config = Config(config_file)
-        self.engine = GAPI(self.config)
         self.slackbot = Slackbot(self.config)
+        self.engine = GAPI(self.config, self.slackbot)
         self.util = Util(DEFAULT_LOGGER_NAME)
 
         all_instance = self.engine.get_all_instance(self.config.ZONE_LIST)
@@ -267,15 +267,15 @@ class GCE_Manager:
                 cloud_cache.add_zone(Zone(zone_name))
         return cloud_cache
 
-    def log(self, subject, send_email=False, email=None):
-        self.util.logger.info(subject)
+    def log(self, message, send_email=False, email=None):
+        self.util.logger.info(message)
 
         if len(self.config.SLACKBOT_API_TOKEN.strip()) > 0:
-            self.slackbot.send_message(self.config.SLACKBOT_LOGGING_CHANNEL, subject)
+            self.slackbot.send_message(self.config.SLACKBOT_LOGGING_CHANNEL, message)
 
         if send_email:
             recipient = self.config.EMAIL_RECIPIENT_LIST if email == None else email
-            self.email_queue.append((self.get_html_summary_report(), recipient, subject))
+            self.email_queue.append((self.get_html_summary_report(), recipient, message))
 
     def low_preemptible_supply(self, zone_name=None):
         if zone_name != None:

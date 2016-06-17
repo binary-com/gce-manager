@@ -88,8 +88,14 @@ SHUTDOWN_MESSAGE        = 'Received SIGHUP signal for graceful shutdown. Exiting
 STARTUP_MESSAGE         = 'Instance monitoring started for project \'%s\''
 USAGE_MESSAGE           = 'Usage: gce_manager.py <config_file.yml>'
 
+SLACKBOT_CMD_HELP       = 'help'
+SLACKBOT_CMD_CONFIG     = 'show config'
+SLACKBOT_CMD_LI         = 'show instance list'
+SLACKBOT_CMD_LZ         = 'show zone list'
+SLACKBOT_CMD_SAVINGS    = 'show savings'
+
+SLACKBOT_EMOJI          = ':snowman:'
 SLACKBOT_ERR_CONNECT    = 'Connection to Slack failed, invalid token?'
-SLACKBOT_ICON_EMOJI     = ':snowman:'
 SLACKBOT_MSG_ACK        = '@%s Here\'s the information that you\'ve requested'
 SLACKBOT_MSG_COST_NOTE  = 'Note: Savings are calculated based on pricing of (non-preemptible usage - preemptible usage)'
 SLACKBOT_MSG_HELP       = '```Commands available:\n1. show config\n2. show instance list\n3. show savings\n4. show zone list\n5. help\n\n%s```' % DEFAULT_EMAIL_FOOTER

@@ -71,15 +71,15 @@ class Slackbot:
     def process_command(self, channel_name, text, timestamp, caller_name):
         command_known, lowercase_text, message = True, text.lower(), ''
 
-        if 'help' in lowercase_text:
+        if SLACKBOT_CMD_HELP in lowercase_text:
             message = SLACKBOT_MSG_HELP
-        elif 'show config' in lowercase_text:
+        elif SLACKBOT_CMD_CONFIG in lowercase_text:
             message = self.format_slack_table(self.config_table, None, True)
-        elif 'show instance list' in lowercase_text:
+        elif SLACKBOT_CMD_LI in lowercase_text:
             message = self.format_slack_table(self.instance_table)
-        elif 'show savings' in lowercase_text:
+        elif SLACKBOT_CMD_SAVINGS in lowercase_text:
             message = self.format_slack_table(self.cost_table, note=SLACKBOT_MSG_COST_NOTE)
-        elif 'show zone list' in lowercase_text:
+        elif SLACKBOT_CMD_LZ in lowercase_text:
             message = self.format_slack_table(self.zone_table)
         else:
             command_known = False
@@ -90,7 +90,7 @@ class Slackbot:
 
         self.send_message(channel_name, message)
 
-    def send_message(self, channel, message, username=SLACKBOT_USERNAME, icon_emoji=SLACKBOT_ICON_EMOJI):
+    def send_message(self, channel, message, username=SLACKBOT_USERNAME, icon_emoji=SLACKBOT_EMOJI):
         self._msg_queue.append((channel, message, username, icon_emoji))
 
     def start_bot(self):

@@ -56,10 +56,10 @@ class GAPI:
                 self.lock.release()
 
     def _log(self, message):
-        self.logger.info(subject)
+        self.logger.info(message)
 
         if self.slackbot != None and len(self.config.SLACKBOT_API_TOKEN.strip()) > 0:
-            self.slackbot.send_message(self.config.SLACKBOT_LOGGING_CHANNEL, subject)
+            self.slackbot.send_message(self.config.SLACKBOT_LOGGING_CHANNEL, message)
 
     def _match_name_prefix_list(self, instance_name):
         for prefix in self.config.INSTANCE_NAME_PREFIX_LIST:

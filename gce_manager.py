@@ -233,7 +233,7 @@ class GCE_Manager:
             threading.Thread(target=_target, args=(_instance,)).start()
 
     def instance_matured(self, instance):
-        pe_matured = (instance.flag == INSTANCE_FLAG_NEW and instance.uptime_hour >= INSTANCE_MATURITY_HOUR)
+        pe_matured = (instance.flag != INSTANCE_FLAG_MATURED and instance.uptime_hour >= INSTANCE_MATURITY_HOUR)
         npe_matured = instance.uptime_hour > self.config.NON_PREEMPTIBLE_INSTANCE_MIN_ALIVE_HOUR
         return pe_matured if instance.preemptible else npe_matured
 

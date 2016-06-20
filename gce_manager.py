@@ -360,7 +360,7 @@ class GCE_Manager:
                     self.recover_instance(terminated_instance, preemptibility, zone_candidate)
                 else:
                     # Pick zone with the least instance count which is the first entry
-                    instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, PE_AVAILABLE_ZONE_ONLY)
+                    instance_count_sorted_zone_table = self.get_sorted_zone_table(INDEX_INSTANCE_COUNT, ALL_ZONE)
                     zone_name, instance_count, termination_rate, zone_total_uptime_hour = instance_count_sorted_zone_table[0]
 
                     # Strategy 3: Convert instance to non-preemptible instance

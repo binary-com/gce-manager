@@ -20,7 +20,7 @@ class Config:
         self.PREEMPTIBLE_HIGH_DEMAND_ZONE_THRESHOLD     = self.config['GCE_PREEMPTIBLE_HIGH_DEMAND_ZONE_THRESHOLD']
         self.SLACKBOT_API_TOKEN                         = self.config['GCE_SLACKBOT_API_TOKEN']
         self.SLACKBOT_LOGGING_CHANNEL                   = self.config['GCE_SLACKBOT_LOGGING_CHANNEL']
-        self.SLACKBOT_USER_LIST                         = self.config['GCE_SLACKBOT_USERS'].split(' ')
+        self.SLACKBOT_USER_LIST                         = self.config['GCE_SLACKBOT_USER_LIST'].split(' ')
         self.EXCLUDED_INSTANCE_LIST                     = self.config['GCE_EXCLUDED_INSTANCE_LIST'].split(' ')
         self.INSTANCE_NAME_PREFIX_LIST                  = self.config['GCE_INSTANCE_NAME_PREFIX_LIST'].split(' ')
         self.INSTANCE_TAG_LIST                          = self.config['GCE_INSTANCE_TAG_LIST'].split(' ')

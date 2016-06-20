@@ -82,8 +82,7 @@ class Slackbot:
         elif SLACKBOT_CMD_LZ in lowercase_text:
             message = self.format_slack_table(self.zone_table)
         else:
-            header = ''
-            message = SLACKBOT_MSG_UNKNOWN % (caller_name, SLACKBOT_USERNAME)
+            header, message = '', SLACKBOT_MSG_UNKNOWN % (caller_name, SLACKBOT_USERNAME)
 
         self.send_message(channel_name, '%s%s' % (header, message))
 

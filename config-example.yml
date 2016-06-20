@@ -48,4 +48,4 @@ GCE_SLACKBOT_API_TOKEN: 'xoxp-XXXXXXXX-XXXXXXXX-XXXXX'
 GCE_SLACKBOT_LOGGING_CHANNEL: '#channel_name'
 
 # Slackbot will only respond to command from these users, separated by space
-GCE_SLACKBOT_USERS: 'user1 user2 user3'
+GCE_SLACKBOT_USER_LIST: 'user1 user2 user3'

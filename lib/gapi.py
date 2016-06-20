@@ -110,7 +110,7 @@ class GAPI:
                 },
                 "metadata": {
                     "items": [{
-                        "key": "fqdn",
+                        "key": "name",
                         "value": instance_name
                     }]
                 },

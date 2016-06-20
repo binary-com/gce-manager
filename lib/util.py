@@ -28,7 +28,7 @@ class Util:
     def get_ascii_table(self, table):
         return AsciiTable(table).table
 
-    def _get_current_user_home(self):
+    def get_current_user_home(self):
         if platform.system() == 'Linux':
             uid = os.stat(CURRENT_PROCESS).st_uid
             user_info = pwd.getpwuid(uid)
@@ -40,7 +40,7 @@ class Util:
 
     def load_object(self, name):
         try:
-            abs_fname = PICKLE_FILE_PATH_FORMAT % (self._get_current_user_home(), name, PICKLE_FILE_EXTENSION)
+            abs_fname = PICKLE_FILE_PATH_FORMAT % (self.get_current_user_home(), name, PICKLE_FILE_EXTENSION)
             if os.path.isfile(abs_fname):
                 with open(abs_fname, 'rb') as input:
                     return pickle.load(input)
@@ -54,7 +54,7 @@ class Util:
         try:
             # Save to a temporary path then move when pickle done to achieve atomic write
             tmp_file = '/tmp/.%s%s' % (name, PICKLE_FILE_EXTENSION)
-            abs_fname = PICKLE_FILE_PATH_FORMAT % (self._get_current_user_home(), name, PICKLE_FILE_EXTENSION)
+            abs_fname = PICKLE_FILE_PATH_FORMAT % (self.get_current_user_home(), name, PICKLE_FILE_EXTENSION)
             with open(tmp_file, 'wb') as output:
                 pickle.dump(_object, output, pickle.HIGHEST_PROTOCOL)
             os.rename(tmp_file, abs_fname)

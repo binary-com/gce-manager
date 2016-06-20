@@ -327,7 +327,7 @@ class GCE_Manager:
                         self.log(MESSAGE_RELOCATE % params, send_email=True)
                     else:
                         # Strategy 3: Convert instance to non-preemptible instance
-                        self.log(MESSAGE_PE_HIGH_DEMAND)
+                        self.log(MESSAGE_SAME_ZONE)
                         self.log(MESSAGE_CONVERT_NPE % params, send_email=True)
                 else:
                     # Strategy 3: Convert instance to non-preemptible instance

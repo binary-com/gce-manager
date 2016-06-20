@@ -77,6 +77,7 @@ MESSAGE_CONVERT_NPE     = 'Converting %s:%s@%s to non-preemptible instance after
 MESSAGE_RECYCLE         = 'Recycling %s:%s@%s after %s hour(s)'
 MESSAGE_RELOCATE        = 'Relocating %s:%s@%s to a different zone after %s hour(s)'
 MESSAGE_PE_HIGH_DEMAND  = 'Exceeded threshold of total zone(s) with high demand in preemptible instance'
+MESSAGE_SAME_ZONE       = 'Destination zone candidate for relocation is same as current zone'
 
 LOG_RECORD_FORMAT       = '[%(asctime)s] %(levelname)s - %(message)s'
 LOG_TIMESTAMP_FORMAT    = '%Y-%m-%d %H:%M:%S'

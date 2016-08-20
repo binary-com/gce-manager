@@ -21,7 +21,7 @@ There are 3 strategies used in GCE Manager to maintain compute capacity:
 5. Google Compute Engine API default rate limit is (20 requests/second) per project. GCE Manager uses (number of zones + 1) request per second to check for all instances status. If you have configured many zones in GCE_ZONE_LIST, you will need to request for a higher rate limit in order for GCE Manager work properly. For more info, visit https://cloud.google.com/compute/docs/api-rate-limits
 
 ## Requirements
-* Python 2.6 or 2.7
+* Python 2.7
 * Number of GCE instance running must be >= number of minimum zone spread count
 
 ## Third Party Libraries and Dependencies

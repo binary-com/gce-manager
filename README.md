@@ -68,4 +68,4 @@ As more uptime accumulated with lesser termination events among instances in all
 * Auto-scaling the number of running instances based on criteria specified in configuration
 
 ## Feedback or bugs report to:
-Teo Sze Siong [teo-at-binary-dot-com]
+Teo Sze Siong [szesiong-at-gmail-dot-com]
